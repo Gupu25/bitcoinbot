@@ -5,14 +5,14 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { TipJar } from '@/components/tip-jar/TipJar';
 import { Footer } from '@/components/footer/Footer';
 import { ProtocolLayers } from '@/components/protocol-layers/ProtocolLayers';
-import { getDictionary } from '@/lib/i18n/config';
+import { getDictionary, isLocale, defaultLocale } from '@/lib/i18n/config';
 import type { TranslationKeys } from '@/lib/i18n/types';
 import fallbackDict from '@/lib/i18n/en.json';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home({ params }: { params: { lang: 'en' | 'es' } }) {
-  const lang = params?.lang || 'en';
+export default async function Home({ params }: { params: { lang: string } }) {
+  const lang = isLocale(params?.lang) ? params.lang : defaultLocale;
 
   let dict: TranslationKeys;
   try {

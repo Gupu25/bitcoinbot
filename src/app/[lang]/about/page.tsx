@@ -1,14 +1,15 @@
-import { getDictionary } from '@/lib/i18n/config';
+import { getDictionary, isLocale, defaultLocale } from '@/lib/i18n/config';
 import { Locale } from '@/lib/i18n/config';
 import { TerminalWindow } from '@/components/terminal/TerminalWindow';
 import { Bitcoin, Zap, Brain, Heart, Code, Globe, Lock, Camera, Terminal, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 interface AboutPageProps {
-  params: { lang: Locale };
+  params: { lang: string };
 }
 
-export default async function AboutPage({ params: { lang } }: AboutPageProps) {
+export default async function AboutPage({ params }: AboutPageProps) {
+  const lang = isLocale(params?.lang) ? params.lang : defaultLocale;
   const dict = await getDictionary(lang);
 
   const techStack = [

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
@@ -14,7 +14,9 @@ import {
   TreePine,
   Loader2,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Pause,
+  Play
 } from 'lucide-react';
 
 type ItemType = 'economy' | 'sponsor' | 'widget';
@@ -60,23 +62,70 @@ interface WidgetSponsor extends BaseItem {
 type Item = Economy | Sponsor | WidgetSponsor;
 
 // ============================================================================
-// COMPONENTE: Widget Card
+// COMPONENTE: Widget Card con Auto-pause
 // ============================================================================
 
 function WidgetCard({ 
   item, 
   isExpanded, 
   onToggleExpand, 
-  isActive 
+  isActive,
+  onInteractionStart,
+  onInteractionEnd,
 }: { 
   item: WidgetSponsor; 
   isExpanded: boolean;
   onToggleExpand: () => void;
   isActive: boolean;
+  onInteractionStart: () => void;
+  onInteractionEnd: () => void;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    onInteractionStart();
+  }, [onInteractionStart]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setTimeout(() => {
+      if (!document.activeElement?.closest(`[data-widget-id="${item.id}"]`)) {
+        onInteractionEnd();
+      }
+    }, 100);
+  }, [onInteractionEnd, item.id]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      const activeElement = document.activeElement;
+      if (activeElement === iframeRef.current || 
+          containerRef.current?.contains(activeElement)) {
+        onInteractionStart();
+      }
+    };
+
+    const handleBlur = () => {
+      setTimeout(() => {
+        const activeElement = document.activeElement;
+        if (!containerRef.current?.contains(activeElement)) {
+          onInteractionEnd();
+        }
+      }, 50);
+    };
+
+    window.addEventListener('focus', handleFocus, true);
+    window.addEventListener('blur', handleBlur, true);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus, true);
+      window.removeEventListener('blur', handleBlur, true);
+    };
+  }, [onInteractionStart, onInteractionEnd]);
 
   useEffect(() => {
     if (isActive) {
@@ -86,16 +135,33 @@ function WidgetCard({
   }, [isActive]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
+    <div 
+      ref={containerRef}
+      data-widget-id={item.id}
+      className="flex flex-col h-full"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="flex items-start gap-3 mb-3">
         <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
           <item.icon className="w-5 h-5 text-[#f7931a]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">
-            {item.name}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-bold text-white font-mono">
+              {item.name}
+            </h3>
+            {isHovered && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 text-green-400 text-[10px] rounded-full border border-green-500/30"
+              >
+                <Pause className="w-3 h-3" />
+                <span>Auto-pausado</span>
+              </motion.span>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {item.audience}
           </p>
@@ -109,7 +175,6 @@ function WidgetCard({
         </button>
       </div>
 
-      {/* Badges */}
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-purple-500/20 text-purple-400 border-purple-500/30">
           Instant Swap
@@ -119,12 +184,10 @@ function WidgetCard({
         </span>
       </div>
 
-      {/* Description */}
       <p className="text-sm text-slate-300 leading-relaxed mb-3">
         {item.description}
       </p>
 
-      {/* Feature box */}
       <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 mb-3">
         <span className="text-xs text-slate-500 uppercase tracking-wider">Destacado</span>
         <p className="text-sm font-mono text-slate-200 mt-1">
@@ -132,13 +195,12 @@ function WidgetCard({
         </p>
       </div>
 
-      {/* Widget Container - Tamaño corregido */}
       <div className={`
         relative rounded-xl overflow-hidden border border-slate-700/50 bg-slate-950
         transition-all duration-500 ease-out flex-1
         ${isExpanded ? 'min-h-[450px]' : 'min-h-[350px]'}
+        ${isHovered ? 'ring-2 ring-[#f7931a]/30' : ''}
       `}>
-        {/* Loading State */}
         <AnimatePresence>
           {isLoading && (
             <motion.div
@@ -152,7 +214,6 @@ function WidgetCard({
           )}
         </AnimatePresence>
 
-        {/* Error State */}
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-10">
             <p className="text-sm text-slate-400 mb-3">No se pudo cargar el widget</p>
@@ -168,7 +229,14 @@ function WidgetCard({
           </div>
         )}
 
-        {/* Iframe */}
+        {!isHovered && !isLoading && !hasError && (
+          <div className="absolute inset-0 z-5 pointer-events-none opacity-0 hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 px-3 py-1.5 rounded-full text-xs text-white">
+              Haz click para pausar el carousel
+            </div>
+          </div>
+        )}
+
         <iframe
           ref={iframeRef}
           src={item.widgetUrl}
@@ -188,44 +256,39 @@ function WidgetCard({
         />
       </div>
 
-      {/* Footer hint */}
       <p className="text-[10px] text-slate-600 mt-2 text-center font-mono">
-        {isExpanded ? 'Presiona minimizar para vista compacta' : 'Presiona expandir para trading completo'}
+        {isHovered 
+          ? 'Carousel pausado. Completa tu operación con calma.' 
+          : isExpanded 
+            ? 'Presiona minimizar para vista compacta' 
+            : 'Presiona expandir para trading completo'
+        }
       </p>
     </div>
   );
 }
 
 // ============================================================================
-// COMPONENTE: Sponsor Card Estándar
+// COMPONENTE: Sponsor Card
 // ============================================================================
 
 function SponsorCard({ item }: { item: Sponsor }) {
-  const Icon = item.icon;
+  const IconComponent = item.icon;
   
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
-          <Icon className="w-5 h-5 text-[#f7931a]" />
+    <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="p-3 rounded-xl bg-[#f7931a]/10 border border-[#f7931a]/20">
+          <IconComponent className="w-6 h-6 text-[#f7931a]" />
         </div>
-        <div>
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">
-            {item.name}
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {item.audience}
-          </p>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-white font-mono">{item.name}</h3>
+          <p className="text-xs text-slate-500 mt-0.5">{item.audience}</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-3">
-        <span className={`
-          inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border
-          ${item.category === 'CEX' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''}
-          ${item.category === 'P2P' ? 'bg-green-500/20 text-green-400 border-green-500/30' : ''}
-          ${item.category === 'Swap' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : ''}
-        `}>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
           {item.category}
         </span>
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-[#f7931a]">
@@ -233,24 +296,22 @@ function SponsorCard({ item }: { item: Sponsor }) {
         </span>
       </div>
 
-      <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
+      <p className="text-sm text-slate-300 leading-relaxed mb-4 flex-1">
         {item.description}
       </p>
 
       <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 mb-4">
         <span className="text-xs text-slate-500 uppercase tracking-wider">Destacado</span>
-        <p className="text-sm font-mono text-slate-200 mt-1">
-          {item.feature}
-        </p>
+        <p className="text-sm font-mono text-slate-200 mt-1">{item.feature}</p>
       </div>
 
       <a
         href={item.website}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#f7931a] hover:bg-amber-400 text-black text-sm font-bold rounded-xl transition-colors w-fit"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f7931a] hover:bg-amber-400 text-black text-sm font-bold rounded-xl transition-colors"
       >
-        Operar
+        Visitar Sitio
         <ExternalLink className="w-4 h-4" />
       </a>
     </div>
@@ -261,38 +322,41 @@ function SponsorCard({ item }: { item: Sponsor }) {
 // COMPONENTE: Economy Card
 // ============================================================================
 
-function EconomyCard({ item, t }: { item: Economy; t: any }) {
+function EconomyCard({ item }: { item: Economy }) {
   const statusColors = {
     active: 'bg-green-500/20 text-green-400 border-green-500/30',
-    coming: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    coming: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     planned: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
   };
 
+  const statusLabels = {
+    active: 'Activo',
+    coming: 'Próximamente',
+    planned: 'Planificado',
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-wrap gap-2 mb-3">
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[item.status]}`}>
-          {item.status === 'active' ? '●' : '○'}
-          <span className="ml-1.5">{t[item.status]}</span>
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-slate-300">
-          <MapPin className="w-3 h-3 mr-1" />
-          {item.location}
-        </span>
+    <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <TreePine className="w-6 h-6 text-emerald-400" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-white font-mono">{item.name}</h3>
+          <div className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
+            <MapPin className="w-3 h-3" />
+            <span>{item.location}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-start gap-3 mb-3">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-green-500/10 border border-green-500/20">
-          <TreePine className="w-5 h-5 text-green-400" />
-        </div>
-        <div>
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">
-            {item.name}
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {item.ecosystem}
-          </p>
-        </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[item.status]}`}>
+          {statusLabels[item.status]}
+        </span>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-slate-300">
+          {item.ecosystem}
+        </span>
       </div>
 
       <p className="text-sm text-slate-300 leading-relaxed mb-4 flex-1">
@@ -303,9 +367,9 @@ function EconomyCard({ item, t }: { item: Economy; t: any }) {
         href={item.website}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white text-sm font-bold rounded-xl transition-colors w-fit"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl transition-colors"
       >
-        {t.visit}
+        Conocer Más
         <ExternalLink className="w-4 h-4" />
       </a>
     </div>
@@ -313,91 +377,83 @@ function EconomyCard({ item, t }: { item: Economy; t: any }) {
 }
 
 // ============================================================================
-// DATA (CORREGIDO: Comisiones Activas)
+// DATA
 // ============================================================================
 
 const items: Item[] = [
+  // Economies
   {
     id: 'bitcoin-beach',
     type: 'economy',
     name: 'Bitcoin Beach',
-    location: 'El Zonte, El Salvador',
-    description: 'La economía circular Bitcoin original. Donde todo comenzó.',
+    description: 'Comunidad pionera en El Zonte, El Salvador, donde Bitcoin es moneda de curso legal. Un modelo de economía circular que inspira al mundo.',
     website: 'https://bitcoinbeach.com',
+    location: 'El Zonte, El Salvador',
     status: 'active',
-    ecosystem: '🌊 Comunidad costera',
+    ecosystem: 'Turismo, Comercio Local',
   },
   {
     id: 'bitcoin-jungle',
     type: 'economy',
     name: 'Bitcoin Jungle',
-    location: 'Costa Rica',
-    description: 'Comunidad costarricense adoptando Bitcoin para turismo y comercio local.',
+    description: 'Ecosistema Bitcoin en Costa Rica que promueve la adopción mediante educación, merchant onboarding y comunidad activa.',
     website: 'https://bitcoinjungle.app',
+    location: 'Costa Rica',
     status: 'active',
-    ecosystem: '🌴 Turismo Bitcoin',
+    ecosystem: 'Pagos, Educación',
   },
   {
-    id: 'changelly',
-    type: 'widget',
-    name: 'Changelly',
-    category: 'Swap',
-    description: 'Intercambio instantáneo de cripto a cripto. 500+ pares disponibles. Sin registro.',
-    website: 'https://changelly.com',
-    commission: '0.25%', // Comisión estimada activa
-    feature: '⚡ Swap instantáneo',
-    audience: 'Usuarios rápidos',
-    icon: Sparkles,
-    // URL LIMPIA: Parámetros optimizados para rev-share y tema oscuro
-    widgetUrl: 'https://widget.changelly.com?from=mxn%2Cusd&to=btc&amount=700&address=&fromDefault=mxn&toDefault=btc&merchant_id=eD8DX5SsvWty_llz&payment_id=&v=3&color=f9861b&headerId=1&logo=visible&buyButtonTextId=2',
-    defaultAmount: 700,
-    defaultFrom: 'mxn',
-    defaultTo: 'btc',
-    height: 450,
-  },
-  {
-    id: 'godex',
-    type: 'sponsor',
-    name: 'Godex.io',
-    category: 'Swap',
-    description: '8+ años, partnerships con Trezor/Monero. Tasas fijas.',
-    website: 'https://godex.io',
-    commission: '0.6%',
-    feature: '🛡️ 8 años',
-    audience: 'Privacidad',
-    icon: Shield,
-  },
-  {
-    id: 'bitcoin-lake',
+    id: 'bitcoin-lagos',
     type: 'economy',
-    name: 'Bitcoin Lake',
-    location: 'Guatemala',
-    description: 'Iniciativa en el Lago Atitlán para educación y adopción Bitcoin.',
-    website: 'https://bitcoinlake.io',
+    name: 'Bitcoin Lagos',
+    description: 'Iniciativa de adopción en Nigeria, uno de los mercados P2P más grandes de Bitcoin en África.',
+    website: 'https://bitcoinlagos.org',
+    location: 'Lagos, Nigeria',
     status: 'coming',
-    ecosystem: '🏞️ Lago Atitlán',
+    ecosystem: 'P2P Trading, Remesas',
   },
+  // Sponsors
   {
-    id: 'hodlhodl',
+    id: 'binance',
     type: 'sponsor',
-    name: 'HodlHodl',
-    category: 'P2P',
-    description: 'Multisig escrow. Cualquier moneda fiat.',
-    website: 'https://hodlhodl.com',
-    commission: '0.3%',
-    feature: '🤝 P2P global',
-    audience: 'Compradores P2P',
+    name: 'Binance',
+    description: 'El exchange de criptomonedas más grande del mundo por volumen. Ofrece trading spot, futures, y una amplia gama de servicios financieros.',
+    website: 'https://binance.com',
+    category: 'CEX',
+    commission: 'Hasta 20% descuento',
+    feature: 'Trading profesional con liquidez profunda',
+    audience: 'Traders de todos los niveles',
     icon: Coins,
   },
   {
-    id: 'bitcoin-isla',
-    type: 'economy',
-    name: 'Bitcoin Isla',
-    location: 'Isla Mujeres, México',
-    description: 'Isla Mujeres como hub de economía circular Bitcoin.',
-    website: '#',
-    status: 'planned',
-    ecosystem: '🏝️ Caribe Mexicano',
+    id: 'paxful',
+    type: 'sponsor',
+    name: 'Paxful',
+    description: 'Marketplace P2P líder que conecta compradores y vendedores de Bitcoin con más de 300 métodos de pago.',
+    website: 'https://paxful.com',
+    category: 'P2P',
+    commission: '0% para compradores',
+    feature: 'Múltiples métodos de pago locales',
+    audience: 'Usuarios sin acceso bancario',
+    icon: Shield,
+  },
+  // Widget Sponsors
+  {
+    id: 'sideshift',
+    type: 'widget',
+    name: 'SideShift.ai',
+    description: 'Exchange instantáneo sin KYC para swaps rápidos entre criptomonedas. Ideal para usuarios que valoran privacidad.',
+    website: 'https://sideshift.ai',
+    category: 'Swap',
+    commission: 'Fee competitivo ~0.5%',
+    feature: 'Sin registro, swaps instantáneos',
+    audience: 'Usuarios que priorizan privacidad',
+    icon: Sparkles,
+    widgetUrl: 'https://sideshift.ai/iframe/btc-to-usdt',
+    defaultAmount: 0.01,
+    defaultFrom: 'BTC',
+    defaultTo: 'USDT',
+    height: 400,
   },
 ];
 
@@ -410,6 +466,12 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
   const [direction, setDirection] = useState(0);
   const [filter, setFilter] = useState<'all' | 'economy' | 'sponsor' | 'widget'>('all');
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  
+  const [isPaused, setIsPaused] = useState(false);
+  const [pauseReason, setPauseReason] = useState<'none' | 'widget' | 'manual'>('none');
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const resumeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredItems = items.filter(item => {
     if (filter === 'all') return true;
@@ -421,55 +483,147 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
   const isEconomy = currentItem?.type === 'economy';
   const isWidget = currentItem?.type === 'widget';
 
-  const t = {
-    en: {
-      title: 'Ecosystem',
-      subtitle: 'Communities & Partners',
-      active: 'Active',
-      coming: 'Soon',
-      planned: 'Planned',
-      commission: 'Commission',
-      feature: 'Feature',
-      audience: 'For',
-      visit: 'Visit',
-      trade: 'Trade',
-      filterAll: 'All',
-      filterEconomies: 'Communities',
-      filterSponsors: 'Partners',
-      filterWidgets: 'Instant',
-      mission: 'Mission',
-      support: 'Support',
-    },
-    es: {
-      title: 'Ecosistema',
-      subtitle: 'Comunidades & Partners',
-      active: 'Activo',
-      coming: 'Pronto',
-      planned: 'Planificado',
-      commission: 'Comisión',
-      feature: 'Destacado',
-      audience: 'Para',
-      visit: 'Visitar',
-      trade: 'Operar',
-      filterAll: 'Todos',
-      filterEconomies: 'Comunidades',
-      filterSponsors: 'Partners',
-      filterWidgets: 'Instantáneo',
-      mission: 'Misión',
-      support: 'Apoyo',
-    },
-  }[lang];
+  // ==========================================================================
+  // CONTROL DEL TIMER
+  // ==========================================================================
+  
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  }, []);
 
-  useEffect(() => {
-    setExpandedWidget(null);
+  const startAutoScroll = useCallback(() => {
+    clearTimers();
     
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setDirection(1);
       setCurrent((prev) => (prev + 1) % filteredItems.length);
     }, 8000);
-    
-    return () => clearInterval(timer);
-  }, [filteredItems.length]);
+  }, [filteredItems.length, clearTimers]);
+
+  const pauseAutoScroll = useCallback((reason: 'widget' | 'manual') => {
+    setIsPaused(true);
+    setPauseReason(reason);
+    clearTimers();
+  }, [clearTimers]);
+
+  const resumeAutoScroll = useCallback((delay = 0) => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+    }
+
+    const resume = () => {
+      setIsPaused(false);
+      setPauseReason('none');
+      startAutoScroll();
+    };
+
+    if (delay > 0) {
+      resumeTimerRef.current = setTimeout(resume, delay);
+    } else {
+      resume();
+    }
+  }, [startAutoScroll]);
+
+  useEffect(() => {
+    if (!isPaused) {
+      startAutoScroll();
+    }
+    return () => clearTimers();
+  }, [isPaused, startAutoScroll, clearTimers]);
+
+  useEffect(() => {
+    setExpandedWidget(null);
+    setCurrent(0);
+    pauseAutoScroll('manual');
+    resumeAutoScroll(2000);
+  }, [filter]);
+
+  // ==========================================================================
+  // HANDLERS DE INTERACCIÓN CON WIDGET
+  // ==========================================================================
+
+  const handleWidgetInteractionStart = useCallback(() => {
+    if (!isPaused) {
+      pauseAutoScroll('widget');
+    }
+  }, [isPaused, pauseAutoScroll]);
+
+  const handleWidgetInteractionEnd = useCallback(() => {
+    if (isPaused && pauseReason === 'widget') {
+      resumeAutoScroll(5000);
+    }
+  }, [isPaused, pauseReason, resumeAutoScroll]);
+
+  // ==========================================================================
+  // NAVEGACIÓN MANUAL
+  // ==========================================================================
+
+  const next = useCallback(() => {
+    pauseAutoScroll('manual');
+    setDirection(1);
+    setCurrent((prev) => (prev + 1) % filteredItems.length);
+    resumeAutoScroll(10000);
+  }, [filteredItems.length, pauseAutoScroll, resumeAutoScroll]);
+
+  const prev = useCallback(() => {
+    pauseAutoScroll('manual');
+    setDirection(-1);
+    setCurrent((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
+    resumeAutoScroll(10000);
+  }, [filteredItems.length, pauseAutoScroll, resumeAutoScroll]);
+
+  const goToSlide = useCallback((idx: number) => {
+    pauseAutoScroll('manual');
+    setDirection(idx > current ? 1 : -1);
+    setCurrent(idx);
+    resumeAutoScroll(10000);
+  }, [current, pauseAutoScroll, resumeAutoScroll]);
+
+  const toggleWidgetExpand = useCallback((id: string) => {
+    setExpandedWidget(prev => {
+      const newState = prev === id ? null : id;
+      
+      if (newState === id) {
+        pauseAutoScroll('widget');
+      } else if (isPaused && pauseReason === 'widget') {
+        resumeAutoScroll(3000);
+      }
+      
+      return newState;
+    });
+  }, [isPaused, pauseReason, pauseAutoScroll, resumeAutoScroll]);
+
+  // ==========================================================================
+  // TRANSLATIONS
+  // ==========================================================================
+
+  const translations = {
+    en: {
+      title: 'Circular Economies & Partners',
+      subtitle: 'Discover Bitcoin communities and trusted services',
+      all: 'All',
+      economies: 'Economies',
+      sponsors: 'Partners',
+      widgets: 'Swap Widgets',
+    },
+    es: {
+      title: 'Economías Circulares & Partners',
+      subtitle: 'Descubre comunidades Bitcoin y servicios de confianza',
+      all: 'Todos',
+      economies: 'Economías',
+      sponsors: 'Partners',
+      widgets: 'Widgets',
+    },
+  };
+
+  const t = translations[lang];
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -489,28 +643,31 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
     }),
   };
 
-  const next = () => {
-    setDirection(1);
-    setCurrent((prev) => (prev + 1) % filteredItems.length);
-  };
-
-  const prev = () => {
-    setDirection(-1);
-    setCurrent((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
-  };
-
-  const toggleWidgetExpand = (id: string) => {
-    setExpandedWidget(expandedWidget === id ? null : id);
-  };
+  const filterButtons: { key: 'all' | 'economy' | 'sponsor' | 'widget'; label: string }[] = [
+    { key: 'all', label: t.all },
+    { key: 'economy', label: t.economies },
+    { key: 'sponsor', label: t.sponsors },
+    { key: 'widget', label: t.widgets },
+  ];
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-slate-950 border-y border-slate-800/50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Header */}
+        {/* Header con indicador de pausa */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#f7931a]/10 border border-[#f7931a]/20 rounded-full text-[#f7931a] text-xs font-mono mb-3">
             <Bitcoin className="w-3 h-3" />
             <span>mission · support · trade</span>
+            {isPaused && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-1 ml-2 pl-2 border-l border-[#f7931a]/30 text-green-400"
+              >
+                <Pause className="w-3 h-3" />
+                <span>{pauseReason === 'widget' ? 'widget active' : 'paused'}</span>
+              </motion.span>
+            )}
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-mono mb-2">
@@ -522,136 +679,114 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
 
           {/* Filter tabs */}
           <div className="flex justify-center gap-2 mt-4 flex-wrap">
-            {[
-              { value: 'all', label: t.filterAll },
-              { value: 'economy', label: t.filterEconomies },
-              { value: 'sponsor', label: t.filterSponsors },
-              { value: 'widget', label: t.filterWidgets },
-            ].map((tab) => (
+            {filterButtons.map((btn) => (
               <button
-                key={tab.value}
-                onClick={() => {
-                  setFilter(tab.value as any);
-                  setCurrent(0);
-                  setExpandedWidget(null);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border ${
-                  filter === tab.value
-                    ? 'bg-[#f7931a] text-black border-[#f7931a]'
-                    : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'
+                key={btn.key}
+                onClick={() => setFilter(btn.key)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  filter === btn.key
+                    ? 'bg-[#f7931a] text-black'
+                    : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
                 }`}
               >
-                {tab.label}
+                {btn.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Card Container - Altura dinámica */}
-        <div 
-          className={`
-            relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden
-            transition-all duration-500 ease-out flex flex-col
-            ${expandedWidget ? 'min-h-[650px]' : 'min-h-[420px]'}
-          `}
-        >
-          {/* Header minimal */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-red-500/60" />
-                <div className="w-2 h-2 rounded-full bg-amber-500/60" />
-                <div className="w-2 h-2 rounded-full bg-green-500/60" />
-              </div>
-              <span className="text-xs text-slate-500 font-mono">
-                {isEconomy ? t.mission : isWidget ? 'Instant Swap' : t.support}
-              </span>
-            </div>
-            <span className="text-xs text-slate-600 font-mono">
-              {current + 1}/{filteredItems.length}
-            </span>
-          </div>
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          <button
+            onClick={prev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full text-white transition-colors"
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full text-white transition-colors"
+            aria-label="Next"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
 
-          {/* Content */}
-          <div className="flex-1 p-4 sm:p-6">
-            <AnimatePresence mode="wait" custom={direction}>
-              {currentItem && (
-                <motion.div
-                  key={`${currentItem.id}-${filter}`}
-                  custom={direction}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="h-full"
-                >
-                  {isEconomy ? (
-                    <EconomyCard item={currentItem as Economy} t={t} />
-                  ) : isWidget ? (
-                    <WidgetCard 
-                      item={currentItem as WidgetSponsor}
-                      isExpanded={expandedWidget === currentItem.id}
-                      onToggleExpand={() => toggleWidgetExpand(currentItem.id)}
-                      isActive={true}
-                    />
-                  ) : (
-                    <SponsorCard item={currentItem as Sponsor} />
-                  )}
-                </motion.div>
-              )}
+          {/* Slide Content */}
+          <div className="min-h-[400px] relative overflow-hidden rounded-2xl">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={current}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="absolute inset-0"
+              >
+                {currentItem && (
+                  <>
+                    {isEconomy && <EconomyCard item={currentItem as Economy} />}
+                    {currentItem?.type === 'sponsor' && <SponsorCard item={currentItem as Sponsor} />}
+                    {isWidget && (
+                      <WidgetCard
+                        item={currentItem as WidgetSponsor}
+                        isExpanded={expandedWidget === currentItem.id}
+                        onToggleExpand={() => toggleWidgetExpand(currentItem.id)}
+                        isActive={true}
+                        onInteractionStart={handleWidgetInteractionStart}
+                        onInteractionEnd={handleWidgetInteractionEnd}
+                      />
+                    )}
+                  </>
+                )}
+              </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-t border-slate-800 mt-auto">
-            <button
-              onClick={prev}
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            <div className="flex gap-1.5">
-              {filteredItems.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setDirection(idx > current ? 1 : -1);
-                    setCurrent(idx);
-                  }}
-                  className={`h-1.5 rounded-full transition-all ${
-                    idx === current
-                      ? 'w-6 bg-[#f7931a]'
-                      : 'w-1.5 bg-slate-700 hover:bg-slate-500'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={next}
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+          {/* Dots Indicator */}
+          <div className="flex justify-center gap-2 mt-4">
+            {filteredItems.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToSlide(idx)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  idx === current
+                    ? 'bg-[#f7931a] w-4'
+                    : 'bg-slate-700 hover:bg-slate-600'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Stats footer */}
-        <div className="mt-4 flex justify-center gap-6 text-xs text-slate-600 font-mono">
-          <span className="flex items-center gap-1">
-            <TreePine className="w-3 h-3" /> 
-            {items.filter(i => i.type === 'economy').length} Comunidades
-          </span>
-          <span className="flex items-center gap-1">
-            <Shield className="w-3 h-3" /> 
-            {items.filter(i => i.type === 'sponsor').length} Partners
-          </span>
-          <span className="flex items-center gap-1 text-[#f7931a]">
-            <Sparkles className="w-3 h-3" /> 
-            {items.filter(i => i.type === 'widget').length} Instant
-          </span>
+        {/* Play/Pause Control */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => {
+              if (isPaused && pauseReason === 'manual') {
+                resumeAutoScroll();
+              } else {
+                pauseAutoScroll('manual');
+              }
+            }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            {isPaused ? (
+              <>
+                <Play className="w-3 h-3" />
+                <span>Resume auto-play</span>
+              </>
+            ) : (
+              <>
+                <Pause className="w-3 h-3" />
+                <span>Pause auto-play</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </section>

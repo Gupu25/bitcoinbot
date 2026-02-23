@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Locale, getDictionary } from '@/lib/i18n/config';
+import { Locale, getDictionary, isLocale, defaultLocale } from '@/lib/i18n/config';
 import { Providers } from './providers';
 import { HiddenMenu } from '@/components/navigation/HiddenMenu';
 
@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params
 }: {
-  params: { lang: Locale }
+  params: { lang: string }
 }): Promise<Metadata> {
-  const lang = params?.lang || 'en';
+  const lang = isLocale(params?.lang) ? params.lang : defaultLocale;
   const dict = await getDictionary(lang);
 
   return {
@@ -39,11 +39,13 @@ export default async function LangLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: Locale };
+  params: { lang: string };
 }) {
+  const lang = isLocale(params?.lang) ? params.lang : defaultLocale;
+
   return (
     <div className="min-h-screen bg-terminal-black text-terminal-green font-mono">
-      <HiddenMenu lang={params.lang} />
+      <HiddenMenu lang={lang as Locale} />
       <Providers>
         {children}
       </Providers>

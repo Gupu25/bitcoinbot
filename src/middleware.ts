@@ -86,6 +86,16 @@ function getCleanIp(request: NextRequest): string {
   return 'unknown';
 }
 
+function getApiKey(request: NextRequest): string | null {
+  // Busca header case-insensitive
+  const headers = Array.from(request.headers.entries());
+  const apiKeyHeader = headers.find(([key]) => key.toLowerCase() === 'x-api-key');
+  
+  return apiKeyHeader?.[1] || 
+         request.nextUrl.searchParams.get('apiKey') || 
+         null;
+}
+
 function isChallengeZone(path: string): boolean {
   const zones = [
     '/challenge/pow',
@@ -306,7 +316,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // CASO A: Admin APIs (/api/satoshi/*)
   if (path.startsWith('/api/satoshi/')) {
-    const apiKey = request.headers.get('x-api-key') || request.nextUrl.searchParams.get('apiKey');
+    const apiKey = getApiKey(request);
 
     if (apiKey !== process.env.ADMIN_API_KEY) {
       tier = 'public';

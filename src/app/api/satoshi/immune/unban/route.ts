@@ -11,7 +11,7 @@ import { redis } from '@/lib/redis';
 export async function POST(request: NextRequest) {
     // 🛡️ 1. VERIFICACIÓN (Solo el Jefe de Médicos)
     const apiKey = request.headers.get('X-API-Key');
-    const adminKey = process.env.ADMIN_API_KEY; // CORREGIDO: Sin llave pública
+    const adminKey = process.env.ADMIN_API_KEY;
 
     if (!apiKey || apiKey !== adminKey) {
         return NextResponse.json({ error: 'Only Chief of Medicine can discharge' }, { status: 401 });
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         // 3. LIMPIEZA DE ANTICUERPOS (Prevención de re-ban inmediato)
         // Limpiamos contadores de fallos pasados
         await redis.del(`btc:pow:failures:${ip}`);
-        
+
         // CORREGIDO: Administrar "Vacuna Temporal"
         // Esto le da 1 hora de inmunidad para navegar sin que el middleware lo re-banee por viejos patrones
         await redis.setex(`btc:immune:verified:${ip}`, 3600, 'admin-unban');
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
             success: true,
             message: `Node ${ip} discharged successfully. Temporary immunity applied.`
         });
-        
+
     } catch (error) {
         console.error('Discharge protocol failure:', error);
         return NextResponse.json({ error: 'Hospital system error' }, { status: 500 });

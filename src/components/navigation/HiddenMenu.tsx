@@ -8,9 +8,6 @@ import { useRouter } from 'next/navigation';
 
 export function HiddenMenu({ lang }: { lang: 'en' | 'es' }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [password, setPassword] = useState('');
-    const [isAdmin, setIsAdmin] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const router = useRouter();
 
@@ -22,15 +19,9 @@ export function HiddenMenu({ lang }: { lang: 'en' | 'es' }) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Check if already admin
-    useEffect(() => {
-        const adminKey = localStorage.getItem('admin_access');
-        if (adminKey === 'true') setIsAdmin(true);
-    }, []);
-
     // Prevenir scroll cuando menú está abierto
     useEffect(() => {
-        if (isOpen || showPasswordModal) {
+        if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
@@ -38,28 +29,11 @@ export function HiddenMenu({ lang }: { lang: 'en' | 'es' }) {
         return () => {
             document.body.style.overflow = '';
         };
-    }, [isOpen, showPasswordModal]);
+    }, [isOpen]);
 
     const handleAdminClick = (path: string) => {
-        if (isAdmin) {
-            router.push(path);
-            setIsOpen(false);
-        } else {
-            setShowPasswordModal(true);
-        }
-    };
-
-    const checkPassword = () => {
-        if (password === 'bitcoin-agent-2026') {
-            localStorage.setItem('admin_access', 'true');
-            setIsAdmin(true);
-            setShowPasswordModal(false);
-            setPassword('');
-            router.push('/satoshi/immune-dashboard');
-            setIsOpen(false);
-        } else {
-            alert(lang === 'en' ? 'Access denied… try again.' : 'Acceso denegado… inténtalo de nuevo.');
-        }
+        router.push(path);
+        setIsOpen(false);
     };
 
     return (
@@ -127,7 +101,7 @@ export function HiddenMenu({ lang }: { lang: 'en' | 'es' }) {
                                     Bitcoin Agent
                                 </h3>
                                 <p className="text-xs text-slate-500 mt-1">
-                                    v2.0.1 • {isAdmin ? 'Admin Mode' : 'Guest'}
+                                    v2.0.1 • Secure Mode
                                 </p>
                             </div>
 
@@ -169,63 +143,10 @@ export function HiddenMenu({ lang }: { lang: 'en' | 'es' }) {
                             {/* Footer del menú */}
                             <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-800 bg-slate-950">
                                 <p className="text-xs text-slate-600 text-center font-mono">
-                                    {isAdmin ? '🔐 Secured Connection' : '🔓 Public Access'}
+                                    🔐 Secured Connection
                                 </p>
                             </div>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Password Modal */}
-            <AnimatePresence>
-                {showPasswordModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-slate-900 border border-[#f7931a]/30 rounded-2xl p-6 w-full max-w-sm"
-                        >
-                            <h3 className="text-lg font-mono text-[#f7931a] mb-2">
-                                {lang === 'en' ? 'Inner Circle Access' : 'Acceso Inner Circle'}
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-6">
-                                {lang === 'en' 
-                                    ? 'This area requires authentication.' 
-                                    : 'Esta área requiere autenticación.'}
-                            </p>
-
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && checkPassword()}
-                                placeholder={lang === 'en' ? 'Enter key...' : 'Ingresa clave...'}
-                                className="w-full bg-black border border-slate-700 rounded-xl px-4 py-3 text-white font-mono mb-4 focus:border-[#f7931a] outline-none"
-                                autoFocus
-                            />
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowPasswordModal(false)}
-                                    className="flex-1 py-3 bg-slate-800 text-slate-400 rounded-xl hover:bg-slate-700 transition font-mono text-sm"
-                                >
-                                    {lang === 'en' ? 'Cancel' : 'Cancelar'}
-                                </button>
-                                <button
-                                    onClick={checkPassword}
-                                    className="flex-1 py-3 bg-[#f7931a] text-black rounded-xl font-bold hover:bg-amber-400 transition font-mono text-sm"
-                                >
-                                    {lang === 'en' ? 'Unlock' : 'Desbloquear'}
-                                </button>
-                            </div>
-                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

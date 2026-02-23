@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Enable source maps for production builds (useful for debugging)
+  productionBrowserSourceMaps: true,
   images: {
     remotePatterns: [
       {
