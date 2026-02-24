@@ -18,9 +18,6 @@ import {
     type UTXO
 } from '@/lib/coinbin/beacon';
 import { TerminalWindow } from '@/components/terminal/TerminalWindow';
-import dynamic from 'next/dynamic';
-
-const QRCodeSVG = dynamic(() => import('qrcode.react').then(mod => mod.QRCodeSVG), { ssr: false });
 
 export default function NativeBeaconPage() {
     const [loaded, setLoaded] = useState(false);
@@ -52,7 +49,6 @@ export default function NativeBeaconPage() {
             setWallet(w);
 
             // ADVERTENCIA: Guardar en sessionStorage para resistir F5
-            // Nota: Esto es seguro para beacons pequeños, pero riesgoso para grandes fondos.
             sessionStorage.setItem('temp_beacon_wif', w.wif);
             sessionStorage.setItem('temp_beacon_addr', w.address);
 
@@ -170,11 +166,6 @@ export default function NativeBeaconPage() {
                                 <div className="bg-[#0f0f0f] p-4 rounded border border-[#2a2a2a]">
                                     <div className="text-xs text-gray-500 uppercase">Address</div>
                                     <div className="text-[#00ff41] break-all text-sm font-bold">{wallet.address}</div>
-                                    <div className="mt-4 flex justify-center">
-                                        <div className="bg-white p-2 rounded">
-                                            <QRCodeSVG value={wallet.address} size={150} />
-                                        </div>
-                                    </div>
                                 </div>
                                 <div className="bg-[#0f0f0f] p-4 rounded border border-[#2a2a2a]">
                                     <div className="text-xs text-gray-500 uppercase">Private Key (WIF)</div>
@@ -256,21 +247,16 @@ export default function NativeBeaconPage() {
                                             </div>
                                         </div>
                                         <div className="bg-[#0a0a0a] p-4 rounded border border-[#2a2a2a]">
-                                            <div className="text-xs text-gray-500 mb-2">Expected TXID</div>
-                                            <div className="text-gray-400 text-xs break-all font-mono">{tx.details.txid}</div>
+                                            <div className="text-xs text-gray-500 mb-2">Raw Transaction (Hex)</div>
+                                            <div className="text-gray-400 text-xs break-all font-mono max-h-32 overflow-y-auto">{tx.rawTx}</div>
                                         </div>
-                                        <div className="flex flex-col lg:flex-row gap-6">
-                                            <button
-                                                onClick={broadcast}
-                                                disabled={broadcasting}
-                                                className="flex-1 bg-[#F7931A] text-black font-black py-5 rounded hover:bg-[#ff9f2a] transition-colors"
-                                            >
-                                                {broadcasting ? '📡 BROADCASTING...' : '🚀 BROADCAST TO NETWORK'}
-                                            </button>
-                                            <div className="bg-white p-3 rounded flex-shrink-0">
-                                                <QRCodeSVG value={tx.rawTx} size={160} />
-                                            </div>
-                                        </div>
+                                        <button
+                                            onClick={broadcast}
+                                            disabled={broadcasting}
+                                            className="w-full bg-[#F7931A] text-black font-black py-5 rounded hover:bg-[#ff9f2a] transition-colors"
+                                        >
+                                            {broadcasting ? '📡 BROADCASTING...' : '🚀 BROADCAST TO NETWORK'}
+                                        </button>
                                     </div>
                                 </TerminalWindow>
                             </motion.div>

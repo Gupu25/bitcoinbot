@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Zap, Globe, Layers, Droplets, Bitcoin, Sparkles, ChevronDown } from 'lucide-react';
+import { Database, Zap, Globe, Layers, Droplet, Bitcoin, Sparkles, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 interface ProtocolLayersProps {
@@ -95,7 +95,7 @@ const layers: Layer[] = [
     id: 'l2-liquid',
     name: 'Liquid Network (L2)',
     esName: 'Liquid (L2)',
-    icon: Droplets,
+    icon: Droplet,
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-400/10 border-cyan-400/20',
     textColor: 'text-cyan-400',
@@ -254,7 +254,6 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
                       hover:border-opacity-60
                     `}
                   >
-                    {/* Badge */}
                     {(isLightning || isLiquid) && (
                       <div className={`
                         absolute -top-2 -right-2 sm:-top-3 sm:-right-3 px-2 sm:px-3 py-1 text-white text-xs font-mono rounded-lg shadow-lg flex items-center gap-1
@@ -310,7 +309,7 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
                               className={`
                                 text-xs px-3 py-1.5 rounded-full border font-mono transition-all
                                 ${activeTooltip === feature.name
-                                  ? `bg-[${layer.textColor}] border-[${layer.textColor}] text-black`
+                                  ? 'bg-orange-500 border-orange-500 text-black'
                                   : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
                                 }
                               `}

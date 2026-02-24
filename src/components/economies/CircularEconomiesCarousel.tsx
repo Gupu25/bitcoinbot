@@ -358,7 +358,11 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="absolute inset-0"
               >
-                {currentItem.type === 'economy' ? (
+                {!currentItem ? (
+                  <div className="flex items-center justify-center h-full text-slate-500">
+                    Loading...
+                  </div>
+                ) : currentItem.type === 'economy' ? (
                   <EconomyCard item={currentItem as Economy} />
                 ) : (
                   <ChangellyWidget />
