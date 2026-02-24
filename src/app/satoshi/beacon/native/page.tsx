@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { TerminalWindow } from '@/components/terminal/TerminalWindow';
 
 export default function NativeBeaconPage() {
     const [loaded, setLoaded] = useState(false);
@@ -19,7 +20,9 @@ export default function NativeBeaconPage() {
             style={{ padding: 40, color: 'white', background: '#0a0a0a', minHeight: '100vh' }}
         >
             <h1>Native Coinbin Beacon</h1>
-            <p>Con framer-motion</p>
+            <TerminalWindow title="test">
+                <p>Si ves esto dentro de la ventana, TerminalWindow funciona.</p>
+            </TerminalWindow>
         </motion.div>
     );
 }
