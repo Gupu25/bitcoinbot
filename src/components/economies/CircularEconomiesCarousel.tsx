@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -17,7 +16,6 @@ import {
 // ============================================================================
 // TYPES
 // ============================================================================
-
 type ItemType = 'economy' | 'exchange';
 
 interface BaseItem {
@@ -37,154 +35,235 @@ interface Economy extends BaseItem {
 
 interface Exchange extends BaseItem {
   type: 'exchange';
-  widgetUrl: string;
+  widgetUrl?: string;
 }
 
 type Item = Economy | Exchange;
 
 // ============================================================================
-// COMPONENTE: Changelly Widget
+// DATA
 // ============================================================================
+const items: Item[] = [
+  {
+    id: 'bitcoin-beach',
+    type: 'economy',
+    name: 'Bitcoin Beach',
+    description:
+      'La primera economía circular de Bitcoin en El Zonte, El Salvador. Pionera en demostrar que Bitcoin puede funcionar como moneda local en una comunidad.',
+    website: 'https://www.bitcoinbeach.com',
+    location: 'El Zonte, El Salvador',
+    status: 'active',
+    ecosystem: 'Lightning Network',
+  },
+  {
+    id: 'bitcoin-jungle',
+    type: 'economy',
+    name: 'Bitcoin Jungle',
+    description:
+      'Economía circular Bitcoin en la costa del Pacífico de Costa Rica. Más de 200 negocios aceptan Bitcoin con Lightning en la región de Uvita y Dominical.',
+    website: 'https://bitcoinjungle.app',
+    location: 'Costa Rica',
+    status: 'active',
+    ecosystem: 'Lightning Network',
+  },
+  {
+    id: 'bitcoin-lagos',
+    type: 'economy',
+    name: 'Bitcoin Lagos',
+    description:
+      'Comunidad Bitcoin creciente en Nigeria que trabaja para empoderar a los ciudadanos con herramientas financieras descentralizadas.',
+    website: 'https://bitcoinlagos.io',
+    location: 'Lagos, Nigeria',
+    status: 'coming',
+    ecosystem: 'Bitcoin + Lightning',
+  },
+  {
+    id: 'changelly',
+    type: 'exchange',
+    name: 'Changelly',
+    description:
+      'Compra Bitcoin al instante con pesos mexicanos o dólares. Widget integrado con nuestra cuenta de referido.',
+    website: 'https://changelly.com',
+    widgetUrl: 'https://widget.changelly.com',
+  },
+  {
+    id: 'aureo',
+    type: 'exchange',
+    name: 'Aureo',
+    description:
+      'Compra y vende Bitcoin instantáneamente con pesos mexicanos vía SPEI y Lightning.',
+    website: 'https://www.aureobitcoin.com',
+  },
+];
 
+// ============================================================================
+// SLIDE VARIANTS
+// ============================================================================
+const variants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 300 : -300,
+    opacity: 0,
+  }),
+};
+
+const transition = {
+  x: { type: 'spring', stiffness: 300, damping: 30 },
+  opacity: { duration: 0.2 },
+};
+
+// ============================================================================
+// CHANGELLY WIDGET
+// ============================================================================
 function ChangellyWidget() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-start gap-3 mb-4">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
-          <Bitcoin className="w-5 h-5 text-[#f7931a]" />
+      <div className="flex items-start gap-4 mb-4">
+        <div className="p-2.5 rounded-xl flex-shrink-0 bg-blue-500/10 border border-blue-500/20">
+          <Bitcoin className="w-6 h-6 text-blue-400" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">
-            Changelly
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Compra Bitcoin con tarjeta o transferencia
-          </p>
+          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Changelly</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Exchange rápido con referral</p>
+        </div>
+      </div>
+
+      <div className="relative flex-1 min-h-[220px] rounded-xl overflow-hidden border border-slate-700/50">
+        {isLoading && !hasError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 z-10">
+            <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          </div>
+        )}
+        {hasError ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+            <Bitcoin className="w-8 h-8" />
+            <p className="text-sm">Widget no disponible</p>
+            <a
+              href="https://changelly.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+            >
+              Ir a Changelly <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        ) : (
+          <iframe
+            src="https://widget.changelly.com?from=mxn&to=btc&amount=1000&address=&fromDefault=mxn&toDefault=btc&theme=dark&merchant_id=your_merchant_id&payment_id=&v=3"
+            width="100%"
+            height="100%"
+            className="border-0"
+            onLoad={() => setIsLoading(false)}
+            onError={() => { setIsLoading(false); setHasError(true); }}
+            title="Changelly Widget"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// AUREO CARD
+// ============================================================================
+function AureoCard() {
+  return (
+    <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
+          <Bitcoin className="w-6 h-6 text-[#f7931a]" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Aureo</h3>
+          <p className="text-xs text-slate-500 mt-0.5">El exchange premium de México</p>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-purple-500/20 text-purple-400 border-purple-500/30">
-          Instant Buy
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-[#f7931a]/20 text-[#f7931a] border-[#f7931a]/30">
+          SPEI + Lightning
         </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-[#f7931a]">
-          MXN, USD → BTC
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
+          MXN → BTC
         </span>
       </div>
 
-      <p className="text-sm text-slate-300 leading-relaxed mb-4">
-        Compra Bitcoin al instante con pesos mexicanos o dólares.
-        Widget integrado con nuestra cuenta de referido.
+      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1">
+        Compra y vende Bitcoin instantáneamente con pesos mexicanos vía SPEI y Lightning.
+        Soporte humano real y programa de referidos. La mejor experiencia local para Bitcoiners mexicanos.
       </p>
 
-      <div className="relative rounded-xl overflow-hidden border border-slate-700/50 bg-slate-950 flex-1 min-h-[400px]">
-        <AnimatePresence>
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-10"
-            >
-              <Loader2 className="w-8 h-8 text-[#f7931a] animate-spin mb-2" />
-              <span className="text-xs text-slate-500 font-mono">Cargando widget...</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <a
+        href="https://www.aureobitcoin.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f7931a] hover:bg-amber-400 text-black text-sm font-bold rounded-xl transition-colors"
+      >
+        Ir a Aureo (usa nuestro referral)
+        <ExternalLink className="w-4 h-4" />
+      </a>
 
-        {hasError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-10">
-            <p className="text-sm text-slate-400 mb-3">No se pudo cargar el widget</p>
-            <a
-              href="https://changelly.com "
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#f7931a] hover:bg-amber-400 text-black text-sm font-bold rounded-xl transition-colors"
-            >
-              Visitar Changelly
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
-        )}
-
-        <iframe
-          src="https://widget.changelly.com?from=mxn%2Cusd&to=btc&amount=700&address=&fromDefault=mxn&toDefault=btc&merchant_id=eD8DX5SsvWty_llz&payment_id=&v=3&type=no-rev-share&color=f9861b&headerId=1&logo=visible&buyButtonTextId=2"
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          allow="camera"
-          onLoad={() => setIsLoading(false)}
-          onError={() => { setIsLoading(false); setHasError(true); }}
-          loading="lazy"
-          className={`
-            absolute inset-0 w-full h-full transition-opacity duration-300
-            ${isLoading || hasError ? 'opacity-0' : 'opacity-100'}
-          `}
-          title="Changelly Exchange Widget"
-        />
-      </div>
-
-      <p className="text-[10px] text-slate-600 mt-3 text-center font-mono">
-        Al usar este widget apoyas nuestro proyecto • Comisiones competitivas
+      <p className="text-[10px] text-slate-600 mt-4 text-center font-mono">
+        Al usar Aureo apoyas nuestro proyecto • Comisiones competitivas
       </p>
     </div>
   );
 }
 
 // ============================================================================
-// COMPONENTE: Economy Card
+// ECONOMY CARD
 // ============================================================================
-
 function EconomyCard({ item }: { item: Economy }) {
-  const statusColors = {
-    active: 'bg-green-500/20 text-green-400 border-green-500/30',
-    coming: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    planned: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  const statusConfig = {
+    active: { label: 'Activa', className: 'bg-green-500/20 text-green-400 border-green-500/30' },
+    coming: { label: 'Próximamente', className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+    planned: { label: 'Planeada', className: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
   };
-
-  const statusLabels = {
-    active: 'Activo',
-    coming: 'Próximamente',
-    planned: 'Planificado',
-  };
+  const { label, className } = statusConfig[item.status];
 
   return (
     <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
       <div className="flex items-start gap-4 mb-4">
-        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-          <TreePine className="w-6 h-6 text-emerald-400" />
+        <div className="p-2.5 rounded-xl flex-shrink-0 bg-green-500/10 border border-green-500/20">
+          <TreePine className="w-6 h-6 text-green-400" />
         </div>
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-white font-mono">{item.name}</h3>
-          <div className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
+          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">{item.name}</h3>
+          <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
             <MapPin className="w-3 h-3" />
-            <span>{item.location}</span>
-          </div>
+            {item.location}
+          </p>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[item.status]}`}>
-          {statusLabels[item.status]}
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${className}`}>
+          {label}
         </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-slate-300">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
           {item.ecosystem}
         </span>
       </div>
 
-      <p className="text-sm text-slate-300 leading-relaxed mb-4 flex-1">
-        {item.description}
-      </p>
+      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1">{item.description}</p>
 
       <a
         href={item.website}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl transition-colors"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white text-sm font-bold rounded-xl transition-colors"
       >
-        Conocer Más
+        Visitar sitio
         <ExternalLink className="w-4 h-4" />
       </a>
     </div>
@@ -192,218 +271,124 @@ function EconomyCard({ item }: { item: Economy }) {
 }
 
 // ============================================================================
-// DATA
+// MAIN COMPONENT
 // ============================================================================
-
-const items: Item[] = [
-  // Economías Circulares
-  {
-    id: 'bitcoin-beach',
-    type: 'economy',
-    name: 'Bitcoin Beach',
-    description: 'Comunidad pionera en El Zonte, El Salvador, donde Bitcoin es moneda de curso legal. Un modelo de economía circular que inspira al mundo.',
-    website: 'https://bitcoinbeach.com ',
-    location: 'El Zonte, El Salvador',
-    status: 'active',
-    ecosystem: 'Turismo, Comercio Local',
-  },
-  {
-    id: 'bitcoin-jungle',
-    type: 'economy',
-    name: 'Bitcoin Jungle',
-    description: 'Ecosistema Bitcoin en Costa Rica que promueve la adopción mediante educación, merchant onboarding y comunidad activa.',
-    website: 'https://bitcoinjungle.app ',
-    location: 'Costa Rica',
-    status: 'active',
-    ecosystem: 'Pagos, Educación',
-  },
-  {
-    id: 'bitcoin-lagos',
-    type: 'economy',
-    name: 'Bitcoin Lagos',
-    description: 'Iniciativa de adopción en Nigeria, uno de los mercados P2P más grandes de Bitcoin en África.',
-    website: 'https://bitcoinlagos.org ',
-    location: 'Lagos, Nigeria',
-    status: 'coming',
-    ecosystem: 'P2P Trading, Remesas',
-  },
-  // Exchange: Solo Changelly
-  {
-    id: 'changelly',
-    type: 'exchange',
-    name: 'Changelly',
-    description: 'Compra Bitcoin al instante con pesos mexicanos o dólares. Widget integrado con nuestra cuenta de referido.',
-    website: 'https://changelly.com ',
-    widgetUrl: 'https://widget.changelly.com ',
-  },
-];
-
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
-
 export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' }) {
-  const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const [[current, direction], setCurrent] = useState<[number, number]>([0, 0]);
   const [isPaused, setIsPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const total = items.length;
+  const currentItem = items[current] ?? null;
 
-  const currentItem = items[current];
+  const paginate = useCallback(
+    (newDirection: number) => {
+      setCurrent(([prev]) => [
+        (prev + newDirection + total) % total,
+        newDirection,
+      ]);
+    },
+    [total]
+  );
 
-  // Auto-scroll
+  // Auto-advance
   useEffect(() => {
-    if (!isPaused) {
-      timerRef.current = setInterval(() => {
-        setDirection(1);
-        setCurrent((prev) => (prev + 1) % items.length);
-      }, 10000); // 10 segundos
+    if (isPaused) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
     }
-
+    intervalRef.current = setInterval(() => paginate(1), 6000);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPaused]);
+  }, [isPaused, paginate]);
 
-  const next = () => {
-    setDirection(1);
-    setCurrent((prev) => (prev + 1) % items.length);
+  const labels = {
+    en: { title: 'Circular Economies', subtitle: 'Real-world Bitcoin communities & exchanges', pause: 'Pause', play: 'Play' },
+    es: { title: 'Economías Circulares', subtitle: 'Comunidades Bitcoin reales e intercambios', pause: 'Pausar', play: 'Reanudar' },
   };
-
-  const prev = () => {
-    setDirection(-1);
-    setCurrent((prev) => (prev - 1 + items.length) % items.length);
-  };
-
-  const goToSlide = (idx: number) => {
-    setDirection(idx > current ? 1 : -1);
-    setCurrent(idx);
-  };
-
-  const translations = {
-    en: {
-      title: 'Circular Economies',
-      subtitle: 'Discover Bitcoin communities and get your first sats',
-    },
-    es: {
-      title: 'Economías Circulares',
-      subtitle: 'Descubre comunidades Bitcoin y obtén tus primeros sats',
-    },
-  };
-
-  const t = translations[lang];
-
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 100 : -100,
-      opacity: 0,
-      scale: 0.95,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    exit: (direction: number) => ({
-      x: direction < 0 ? 100 : -100,
-      opacity: 0,
-      scale: 0.95,
-    }),
-  };
+  const t = labels[lang];
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-slate-950 border-y border-slate-800/50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#f7931a]/10 border border-[#f7931a]/20 rounded-full text-[#f7931a] text-xs font-mono mb-3">
-            <Bitcoin className="w-3 h-3" />
-            <span>adoption · community · on-ramp</span>
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-mono mb-2">
-            {t.title}
-          </h2>
-          <p className="text-sm sm:text-base text-slate-400">
-            {t.subtitle}
-          </p>
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div>
+          <h2 className="text-xl font-bold text-white font-mono">{t.title}</h2>
+          <p className="text-xs text-slate-500 mt-0.5">{t.subtitle}</p>
         </div>
-
-        {/* Carousel */}
-        <div className="relative">
-          {/* Navigation */}
-          <button
-            onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full text-white transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full text-white transition-colors"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-
-          {/* Content */}
-          <div className="min-h-[500px] relative overflow-hidden rounded-2xl">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div
-                key={current}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="absolute inset-0"
-              >
-                {!currentItem ? (
-                  <div className="flex items-center justify-center h-full text-slate-500">
-                    Loading...
-                  </div>
-                ) : currentItem.type === 'economy' ? (
-                  <EconomyCard item={currentItem as Economy} />
-                ) : (
-                  <ChangellyWidget />
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-4">
-            {items.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goToSlide(idx)}
-                className={`w-2 h-2 rounded-full transition-all ${idx === current ? 'bg-[#f7931a] w-4' : 'bg-slate-700 hover:bg-slate-600'
-                  }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Pause/Play */}
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
-          >
-            {isPaused ? (
-              <>
-                <Play className="w-3 h-3" />
-                <span>Resume</span>
-              </>
-            ) : (
-              <>
-                <Pause className="w-3 h-3" />
-                <span>Pause</span>
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          onClick={() => setIsPaused(p => !p)}
+          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+          aria-label={isPaused ? t.play : t.pause}
+        >
+          {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+        </button>
       </div>
-    </section>
+
+      {/* Carousel */}
+      <div className="relative w-full" style={{ minHeight: '340px' }}>
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          <motion.div
+            key={current}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={transition}
+            className="absolute inset-0"
+          >
+            {!currentItem ? (
+              <div className="flex items-center justify-center h-full text-slate-500">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+            ) : currentItem.type === 'economy' ? (
+              <EconomyCard item={currentItem as Economy} />
+            ) : currentItem.id === 'changelly' ? (
+              <ChangellyWidget />
+            ) : (
+              <AureoCard />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center justify-between mt-4 px-1">
+        {/* Prev */}
+        <button
+          onClick={() => paginate(-1)}
+          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+          aria-label="Previous"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        {/* Dots */}
+        <div className="flex items-center gap-1.5">
+          {items.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(([prev]) => [i, i > prev ? 1 : -1])}
+              className={`rounded-full transition-all duration-300 ${i === current
+                  ? 'w-5 h-2 bg-[#f7931a]'
+                  : 'w-2 h-2 bg-slate-600 hover:bg-slate-400'
+                }`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Next */}
+        <button
+          onClick={() => paginate(1)}
+          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+          aria-label="Next"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
   );
 }
