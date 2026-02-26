@@ -9,7 +9,7 @@ An AI-powered educational tool for understanding Bitcoin and Lightning Network i
 ## Features
 
 - 🤖 **AI-Powered Chat**: Ask questions about Bitcoin protocol, Lightning Network, mining, and more
-- 📚 **RAG-Enhanced Responses**: Answers powered by the Bitcoin whitepaper and technical documentation
+- 📚 **RAG-Enhanced Responses**: Answers powered by a curated knowledge base — Bitcoin whitepaper, *Mi Primer Bitcoin* book, and technical documentation
 - 🌐 **Internationalization**: Available in English and Spanish
 - ⚡ **Lightning Tips**: Accepts Lightning Network donations via Blink (Cashu)
 - 💻 **Terminal UI**: Hacker-style terminal interface for authentic Bitcoin aesthetic
@@ -67,8 +67,11 @@ npx prisma generate
 # Push schema to database
 npx prisma db push
 
-# Seed vector database with Bitcoin whitepaper
+# Seed vector database (whitepaper + Mi Primer Bitcoin book)
 npm run db:seed
+
+# Or seed only a specific source
+npx ts-node scripts/rag/upload_diploma_to_rag.ts
 
 # Start development server
 npm run dev
@@ -104,7 +107,10 @@ bitcoin-agent/
 ├── prisma/
 │   └── schema.prisma         # Database schema
 ├── scripts/
-│   └── seed-whitepaper.ts    # Vector DB seeding
+│   ├── seed-whitepaper.ts         # Seeds Bitcoin whitepaper into vector DB
+│   └── rag/
+│       ├── upload_diploma_to_rag.ts  # Seeds Mi Primer Bitcoin book
+│       └── README.md                 # RAG dataset documentation
 ├── tailwind.config.ts
 └── package.json
 ```
@@ -143,6 +149,29 @@ Create a Lightning Network payment request.
   "message": "Thanks for the help!"
 }
 ```
+
+## Knowledge Base (RAG)
+
+The agent's responses are grounded in a curated vector knowledge base stored in **Upstash Vector**.
+
+| Source | Description | Chunks | Language |
+|--------|-------------|--------|----------|
+| Bitcoin Whitepaper | Satoshi Nakamoto's original paper | ~15 | EN |
+| *Mi Primer Bitcoin* | Bitcoin Diploma workbook by My First Bitcoin (El Salvador) | 15 | EN/ES |
+
+### Adding new documents
+
+```bash
+# Upload Mi Primer Bitcoin book
+npx ts-node scripts/rag/upload_diploma_to_rag.ts
+
+# Upload Bitcoin whitepaper
+npm run db:seed
+```
+
+See [`scripts/rag/README.md`](scripts/rag/README.md) for detailed instructions on the RAG dataset structure.
+
+---
 
 ## i18n
 

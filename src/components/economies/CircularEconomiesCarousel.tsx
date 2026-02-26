@@ -13,8 +13,6 @@ import {
   Loader2,
   Globe,
   Zap,
-  TrendingUp,
-  Wallet,
 } from 'lucide-react';
 
 // ============================================================================
@@ -43,7 +41,7 @@ type Exchange = {
 type Item = Economy | Exchange;
 
 // ============================================================================
-// DATA - ACTUALIZADO CON KAPITALEX 🎯
+// DATA
 // ============================================================================
 const items: Item[] = [
   {
@@ -139,11 +137,9 @@ const transition = {
 // SUB-COMPONENTS
 // ============================================================================
 
-// 🎯 KAPITALEX CARD - NUEVA Y HERMOSA!
 function KapitalexCard() {
   return (
-    <div className="relative flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50 overflow-hidden">
-      {/* Background gradient effect */}
+    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-orange-500/30 transition-colors">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff6b35]/5 rounded-full blur-3xl" />
 
       <div className="flex items-start gap-4 mb-4 relative z-10">
@@ -156,7 +152,7 @@ function KapitalexCard() {
             <motion.span
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+              transition={{ repeat: Infinity, repeatType: 'reverse', duration: 1.5 }}
               className="text-[8px] bg-green-500 text-black px-1.5 py-0.5 rounded-full font-bold"
             >
               NUEVO
@@ -170,10 +166,10 @@ function KapitalexCard() {
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
           🇲🇽 México
         </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
           Préstamos con BTC
         </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
           MXNT + USDT
         </span>
       </div>
@@ -194,62 +190,67 @@ function KapitalexCard() {
         <ExternalLink className="w-4 h-4" />
       </a>
 
-      {/* Badge de referido */}
       <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-20">
         🎯 Partner
       </div>
 
       <p className="text-[10px] text-slate-600 mt-4 text-center font-mono relative z-10">
-        Al registrarte apoyas a BOB • Préstamos rápidos sin buró
+        Al registrarte apoyas a BOB • Préstamos rápidos sin buró de crédito
       </p>
     </div>
   );
 }
 
-// Changelly Widget Component
 function ChangellyWidget() {
   return (
-    <div className="flex flex-col h-full p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-[#10d078]/10 border border-[#10d078]/20">
-          <TrendingUp className="w-5 h-5 text-[#10d078]" />
+    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-orange-500/30 transition-colors">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#f7931a]/5 rounded-full blur-3xl" />
+
+      <div className="flex items-start gap-4 mb-4 relative z-10">
+        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
+          <Bitcoin className="w-6 h-6 text-[#f7931a]" />
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-white font-mono">Changelly</h3>
-          <p className="text-xs text-slate-500">Compra instantánea</p>
+        <div className="flex-1">
+          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Changelly</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Exchange instantáneo global</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 relative">
-        <iframe
-          src="https://widget.changelly.com?from=usd&to=btc&amount=100&theme=dark"
-          className="w-full h-full min-h-[200px]"
-          style={{ border: 'none' }}
-          title="Changelly Widget"
-        />
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" />
+      <div className="flex flex-wrap gap-2 mb-4 relative z-10">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
+          🌎 Global
+        </span>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
+          Tarjeta / SPEI
+        </span>
       </div>
+
+      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1 relative z-10">
+        Compra Bitcoin al instante con tarjeta de crédito, débito o transferencia bancaria.
+        Servicio disponible en México y LATAM. Sin registro complejo.
+      </p>
 
       <a
         href="https://changelly.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#10d078] hover:bg-[#0db56a] text-white text-sm font-bold rounded-xl transition-colors"
+        className="relative z-10 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black text-sm font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
       >
-        Abrir Changelly
+        Comprar Bitcoin
         <ExternalLink className="w-4 h-4" />
       </a>
     </div>
   );
 }
 
-// Aureo Card Component
 function AureoCard() {
   return (
-    <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-      <div className="flex items-start gap-4 mb-4">
+    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-amber-500/30 transition-colors">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl" />
+
+      <div className="flex items-start gap-4 mb-4 relative z-10">
         <div className="p-2.5 rounded-xl flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
-          <Zap className="w-6 h-6 text-amber-500" />
+          <Bitcoin className="w-6 h-6 text-amber-400" />
         </div>
         <div className="flex-1">
           <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Aureo</h3>

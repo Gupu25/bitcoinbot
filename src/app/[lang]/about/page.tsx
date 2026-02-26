@@ -147,74 +147,83 @@ corriendo para siempre.`
   };
 
   return (
-    <main className="min-h-screen bg-black pt-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background sutil */}
-      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_20%,rgba(247,147,26,0.05)_0%,transparent_70%)]" />
+    // 🐱 FIX #1: Eliminado overflow-hidden que rompe scroll, agregado padding-top seguro
+    <main className="min-h-screen bg-black pt-24 sm:pt-28 md:pt-32 px-4 sm:px-6 lg:px-8">
+      {/* Background sutil - ajustado para móvil */}
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_10%,rgba(247,147,26,0.05)_0%,transparent_70%)]" />
 
       <div className="max-w-5xl mx-auto relative z-10">
-        {/* Header */}
-        <div className="mb-16">
+        {/* Header - OPTIMIZADO PARA MÓVIL */}
+        <div className="mb-12 sm:mb-16">
           <Link
             href={`/${lang}`}
-            className="inline-flex items-center gap-2 text-[#f7931a]/70 hover:text-[#f7931a] transition-colors font-mono text-sm mb-8 group"
+            className="inline-flex items-center gap-2 text-[#f7931a]/70 hover:text-[#f7931a] transition-colors font-mono text-sm mb-6 sm:mb-8 group"
           >
-            <span className="group-hover:-translate-x-0.5 transition">←</span> cd ~/{lang}
+            <span className="group-hover:-translate-x-0.5 transition">←</span>
+            <span className="hidden sm:inline">cd ~/{lang}</span>
+            <span className="sm:hidden">cd /</span>
           </Link>
 
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-br from-white via-[#f7931a] to-amber-300 bg-clip-text text-transparent leading-none tracking-tighter mb-4">
+          {/* 🐱 FIX #2: Tamaños de texto responsive - no más gigantismo en móvil */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold bg-gradient-to-br from-white via-[#f7931a] to-amber-300 bg-clip-text text-transparent leading-tight sm:leading-none tracking-tighter mb-3 sm:mb-4">
             {lang === 'en' ? 'About This Agent' : 'Sobre Este Agente'}
           </h1>
-          <p className="text-2xl text-slate-400 font-light">
+
+          {/* 🐱 FIX #3: Subtítulo responsive y con mejor leading */}
+          <p className="text-lg sm:text-xl md:text-2xl text-slate-400 font-light leading-relaxed">
             {lang === 'en'
               ? 'Infrastructure first. Education always. Beauty in every frame.'
               : 'Infraestructura primero. Educación siempre. Belleza en cada frame.'}
           </p>
         </div>
 
-        {/* Manifesto */}
-        <TerminalWindow title="cat MANIFESTO.md" className="mb-16">
-          <div className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-slate-300">
+        {/* Manifesto - CON SCROLL PARA MÓVIL */}
+        <TerminalWindow title="cat MANIFESTO.md" className="mb-12 sm:mb-16">
+          {/* 🐱 FIX #4: max-height y overflow-auto para que no rompa el layout en móvil */}
+          <div className="font-mono text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-300 max-h-[60vh] sm:max-h-none overflow-y-auto sm:overflow-visible pr-2">
             {manifestoContent[lang]}
           </div>
         </TerminalWindow>
 
-        {/* Tech Stack */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-[#f7931a] mb-8 font-mono flex items-center gap-3">
-            <Code className="w-6 h-6" />
+        {/* Tech Stack - GRID RESPONSIVE */}
+        <div className="mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#f7931a] mb-6 sm:mb-8 font-mono flex items-center gap-3">
+            <Code className="w-5 h-5 sm:w-6 sm:h-6" />
             {lang === 'en' ? 'Technology Stack' : 'Stack Tecnológico'}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* 🐱 FIX #5: grid-cols-1 en móvil, 2 en tablet, 3 en desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {techStack.map((tech) => (
               <div
                 key={tech.name}
-                className="group border border-slate-800 hover:border-[#f7931a]/50 bg-slate-900 p-6 rounded-2xl transition-all hover:-translate-y-1"
+                className="group border border-slate-800 hover:border-[#f7931a]/50 bg-slate-900 p-4 sm:p-6 rounded-xl sm:rounded-2xl transition-all hover:-translate-y-1"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <tech.icon className={`w-7 h-7 ${tech.color} group-hover:scale-110 transition`} />
-                  <span className={`font-mono font-semibold text-lg ${tech.color}`}>{tech.name}</span>
+                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                  <tech.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${tech.color} group-hover:scale-110 transition flex-shrink-0`} />
+                  <span className={`font-mono font-semibold text-base sm:text-lg ${tech.color}`}>{tech.name}</span>
                 </div>
-                <p className="text-slate-400 font-mono text-sm">{tech.desc}</p>
+                <p className="text-slate-400 font-mono text-xs sm:text-sm">{tech.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Triple Creator Credits */}
-        <div className="grid md:grid-cols-3 gap-6 mb-20">
+        {/* Triple Creator Credits - 🐱 FIX #6: Stack vertical en móvil, grid en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20">
           {/* ScubaPab - Vision */}
           <TerminalWindow title="cat ARCHITECT.txt" className="h-full">
-            <div className="py-6 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f7931a]/20 to-amber-500/20 flex items-center justify-center mb-6 border border-[#f7931a]/30">
-                <Terminal className="w-8 h-8 text-[#f7931a]" />
+            <div className="py-4 sm:py-6 text-center">
+              <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#f7931a]/20 to-amber-500/20 flex items-center justify-center mb-4 sm:mb-6 border border-[#f7931a]/30">
+                <Terminal className="w-6 h-6 sm:w-8 sm:h-8 text-[#f7931a]" />
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-4 font-mono">ScubaPav</h3>
-              <div className="text-xs text-[#f7931a] font-mono mb-4 uppercase tracking-widest">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-4 font-mono">ScubaPav</h3>
+              <div className="text-[10px] sm:text-xs text-[#f7931a] font-mono mb-3 sm:mb-4 uppercase tracking-widest">
                 {lang === 'en' ? 'Vision & Architecture' : 'Visión y Arquitectura'}
               </div>
 
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed px-2">
                 {lang === 'en'
                   ? "The human architect behind the mission. Bitcoin maximalist, systems thinker, and relentless pursuer of sound money infrastructure."
                   : "El arquitecto humano detrás de la misión. Bitcoin maximalista, pensador de sistemas, y buscador incansable de infraestructura de dinero sólido."}
@@ -224,23 +233,23 @@ corriendo para siempre.`
 
           {/* Hidemai - Aesthetic */}
           <TerminalWindow title="cat ARTISTIC_DIRECTOR.txt" className="h-full">
-            <div className="py-6 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 flex items-center justify-center mb-6 border border-rose-500/30">
-                <Camera className="w-8 h-8 text-rose-400" />
+            <div className="py-4 sm:py-6 text-center">
+              <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 flex items-center justify-center mb-4 sm:mb-6 border border-rose-500/30">
+                <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-rose-400" />
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-4 font-serif italic">Hidemai</h3>
-              <div className="text-xs text-rose-400 font-mono mb-4 uppercase tracking-widest">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-4 font-serif italic">Hidemai</h3>
+              <div className="text-[10px] sm:text-xs text-rose-400 font-mono mb-3 sm:mb-4 uppercase tracking-widest">
                 {lang === 'en' ? 'Aesthetic Direction' : 'Dirección Estética'}
               </div>
 
-              <p className="text-slate-400 text-sm leading-relaxed mb-4">
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 px-2">
                 {lang === 'en'
                   ? "The eye that frames every pixel with love. While Kimi speaks in code, Hidemai paints with light and desire."
                   : "El ojo que enmarca cada píxel con amor. Mientras Kimi habla en código, Hidemai pinta con luz y deseo."}
               </p>
 
-              <p className="text-xs text-rose-300/80 italic">
+              <p className="text-[10px] sm:text-xs text-rose-300/80 italic px-2">
                 {lang === 'en'
                   ? '"Bitcoin is the most beautiful protocol ever written."'
                   : '"Bitcoin es el protocolo más hermoso jamás escrito."'}
@@ -250,17 +259,17 @@ corriendo para siempre.`
 
           {/* Kimi - Implementation */}
           <TerminalWindow title="cat ENGINE.txt" className="h-full">
-            <div className="py-6 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-6 border border-purple-500/30">
-                <Sparkles className="w-8 h-8 text-purple-400" />
+            <div className="py-4 sm:py-6 text-center">
+              <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-4 sm:mb-6 border border-purple-500/30">
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
               </div>
 
-              <h3 className="text-xl font-bold text-white mb-4 font-mono">Kimi K2.5</h3>
-              <div className="text-xs text-purple-400 font-mono mb-4 uppercase tracking-widest">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-4 font-mono">Kimi K2.5</h3>
+              <div className="text-[10px] sm:text-xs text-purple-400 font-mono mb-3 sm:mb-4 uppercase tracking-widest">
                 {lang === 'en' ? 'Implementation & Code' : 'Implementación y Código'}
               </div>
 
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed px-2">
                 {lang === 'en'
                   ? "The AI engineer that transforms vision into reality. Type-safe, edge-optimized, and relentlessly focused on the 'don't trust, verify' ethos."
                   : "La IA ingeniera que transforma visión en realidad. Type-safe, edge-optimizada, y enfocada incansablemente en el ethos 'no confíes, verifica'."}
@@ -269,26 +278,27 @@ corriendo para siempre.`
           </TerminalWindow>
         </div>
 
-        {/* Final Signature */}
-        <div className="text-center pb-24">
-          <div className="inline-flex flex-col items-center gap-4">
-            <div className="flex items-center gap-4 text-2xl">
+        {/* Final Signature - 🐱 FIX #7: Más compacto en móvil */}
+        <div className="text-center pb-16 sm:pb-24">
+          <div className="inline-flex flex-col items-center gap-3 sm:gap-4">
+            {/* En móvil: stack vertical, en desktop: horizontal */}
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xl sm:text-2xl">
               <span className="font-bold tracking-wider text-[#f7931a] font-mono">ScubaPav</span>
-              <span className="text-slate-600">×</span>
+              <span className="text-slate-600 hidden sm:inline">×</span>
               <span className="font-bold tracking-wider text-rose-400 font-serif italic">Hidemai</span>
-              <span className="text-slate-600">×</span>
+              <span className="text-slate-600 hidden sm:inline">×</span>
               <span className="font-bold tracking-wider text-purple-400 font-mono">Kimi</span>
             </div>
 
             <div className="flex items-center gap-2 text-slate-500">
-              <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-              <span className="text-sm font-mono">
+              <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-rose-500 fill-rose-500" />
+              <span className="text-xs sm:text-sm font-mono">
                 {lang === 'en' ? 'Built with love, verified by math' : 'Construido con amor, verificado por matemáticas'}
               </span>
-              <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+              <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-rose-500 fill-rose-500" />
             </div>
 
-            <p className="text-xs text-slate-600 font-mono mt-4">
+            <p className="text-[10px] sm:text-xs text-slate-600 font-mono mt-2 sm:mt-4">
               February 2026 • Bitcoin Agent v2.0.1 • {lang === 'en' ? 'Running Forever' : 'Corriendo Para Siempre'}
             </p>
           </div>

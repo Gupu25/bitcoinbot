@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Database, Zap, Globe, Layers, Droplet, Bitcoin, Sparkles, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { Database, Zap, Globe, Layers, Droplet, Bitcoin, Sparkles, ChevronDown, Info } from 'lucide-react';
+import { useState, useCallback } from 'react';
 
 interface ProtocolLayersProps {
   lang?: 'en' | 'es';
@@ -10,139 +10,128 @@ interface ProtocolLayersProps {
 
 interface LayerFeature {
   name: string;
+  nameEs: string;
   tooltip: string;
+  tooltipEs: string;
 }
 
 interface Layer {
   id: string;
   name: string;
-  esName: string;
-  icon: any;
+  nameEs: string;
+  shortName: string;
+  icon: React.ElementType;
   color: string;
   bgColor: string;
   textColor: string;
-  description: {
-    en: string;
-    es: string;
-  };
-  analogy: {
-    en: string;
-    es: string;
-  };
+  borderColor: string;
+  description: string;
+  descriptionEs: string;
+  analogy: string;
+  analogyEs: string;
   features: LayerFeature[];
-  stats?: {
-    label: string;
-    value: string;
-  }[];
+  stats: { label: string; labelEs: string; value: string }[];
 }
 
 const layers: Layer[] = [
   {
     id: 'l1',
     name: 'Base Layer (L1)',
-    esName: 'Capa Base (L1)',
+    nameEs: 'Capa Base (L1)',
+    shortName: 'L1',
     icon: Database,
     color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10 border-orange-500/20',
+    bgColor: 'bg-orange-500/10',
     textColor: 'text-orange-500',
-    description: {
-      en: 'Settlement & finality. The foundation where all transactions are permanently recorded.',
-      es: 'Liquidación y finalidad. La base donde todas las transacciones se registran permanentemente.'
-    },
-    analogy: {
-      en: '🏛️ Like a bank vault: secure, slow, and permanent.',
-      es: '🏛️ Como una caja fuerte: segura, lenta y permanente.'
-    },
+    borderColor: 'border-orange-500/20',
+    description: 'Settlement & finality. The foundation where all transactions are permanently recorded.',
+    descriptionEs: 'Liquidación y finalidad. La base donde todas las transacciones se registran permanentemente.',
+    analogy: '🏛️ Like a bank vault: secure, slow, and permanent.',
+    analogyEs: '🏛️ Como una caja fuerte: segura, lenta y permanente.',
     features: [
-      { name: 'Proof-of-Work', tooltip: 'Miners secure the network with computational power' },
-      { name: '21M cap', tooltip: 'Digital scarcity - only 21 million Bitcoin will ever exist' },
-      { name: 'Decentralized', tooltip: 'No single entity controls the network' }
+      { name: 'Proof-of-Work', nameEs: 'Prueba de Trabajo', tooltip: 'Miners secure the network with computational power', tooltipEs: 'Mineros aseguran la red con poder computacional' },
+      { name: '21M cap', nameEs: 'Tope 21M', tooltip: 'Digital scarcity - only 21 million Bitcoin will ever exist', tooltipEs: 'Escasez digital - solo existirán 21 millones de Bitcoin' },
+      { name: 'Decentralized', nameEs: 'Descentralizado', tooltip: 'No single entity controls the network', tooltipEs: 'Ninguna entidad controla la red' }
     ],
     stats: [
-      { label: 'Block time', value: '~10 min' },
-      { label: 'Finality', value: '60 min' },
-      { label: 'Capacity', value: '~7 tps' }
+      { label: 'Block time', labelEs: 'Bloque', value: '~10 min' },
+      { label: 'Finality', labelEs: 'Finalidad', value: '60 min' },
+      { label: 'Capacity', labelEs: 'Capacidad', value: '~7 tps' }
     ]
   },
   {
     id: 'l2-lightning',
-    name: 'Lightning Network (L2)',
-    esName: 'Lightning (L2)',
+    name: 'Lightning Network',
+    nameEs: 'Lightning Network',
+    shortName: 'Lightning',
     icon: Zap,
     color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10 border-blue-500/20',
+    bgColor: 'bg-blue-500/10',
     textColor: 'text-blue-500',
-    description: {
-      en: 'Instant payments at scale. A layer ON TOP of Bitcoin for fast, cheap transactions.',
-      es: 'Pagos instantáneos a escala. Una capa ENCIMA de Bitcoin para transacciones rápidas y baratas.'
-    },
-    analogy: {
-      en: '⚡ Like a tab at a bar: open a tab, transact all night, settle once.',
-      es: '⚡ Como una cuenta en un bar: abres cuenta, transaccionas, pagas al cerrar.'
-    },
+    borderColor: 'border-blue-500/20',
+    description: 'Instant payments at scale. A layer ON TOP of Bitcoin for fast, cheap transactions.',
+    descriptionEs: 'Pagos instantáneos a escala. Una capa SOBRE Bitcoin para transacciones rápidas y baratas.',
+    analogy: '⚡ Like a tab at a bar: open, transact, settle once.',
+    analogyEs: '⚡ Como una cuenta en un bar: abres, transaccionas, pagas al cerrar.',
     features: [
-      { name: 'Payment Channels', tooltip: 'Private pathways for unlimited off-chain transactions' },
-      { name: 'Atomic Swaps', tooltip: 'Trustless exchange between cryptocurrencies' },
-      { name: 'Micro-payments', tooltip: 'Send amounts as small as 1 satoshi' }
+      { name: 'Payment Channels', nameEs: 'Canales de Pago', tooltip: 'Private pathways for unlimited off-chain transactions', tooltipEs: 'Caminos privados para transacciones ilimitadas off-chain' },
+      { name: 'Atomic Swaps', nameEs: 'Swaps Atómicos', tooltip: 'Trustless exchange between cryptocurrencies', tooltipEs: 'Intercambio sin confianza entre criptomonedas' },
+      { name: 'Micro-payments', nameEs: 'Micro-pagos', tooltip: 'Send amounts as small as 1 satoshi', tooltipEs: 'Envía montos tan pequeños como 1 satoshi' }
     ],
     stats: [
-      { label: 'Speed', value: 'Instant' },
-      { label: 'Fee', value: '< $0.001' },
-      { label: 'Capacity', value: '1M+ tps' }
+      { label: 'Speed', labelEs: 'Velocidad', value: 'Instant' },
+      { label: 'Fee', labelEs: 'Comisión', value: '< $0.001' },
+      { label: 'Capacity', labelEs: 'Capacidad', value: '1M+ tps' }
     ]
   },
   {
     id: 'l2-liquid',
-    name: 'Liquid Network (L2)',
-    esName: 'Liquid (L2)',
+    name: 'Liquid Network',
+    nameEs: 'Liquid Network',
+    shortName: 'Liquid',
     icon: Droplet,
     color: 'text-cyan-400',
-    bgColor: 'bg-cyan-400/10 border-cyan-400/20',
+    bgColor: 'bg-cyan-400/10',
     textColor: 'text-cyan-400',
-    description: {
-      en: 'Bitcoin sidechain for traders & institutions. Confidential transactions with 1-minute blocks.',
-      es: 'Sidechain de Bitcoin para traders e instituciones. Transacciones confidenciales con bloques de 1 minuto.'
-    },
-    analogy: {
-      en: '💧 Like a private express lane: faster, confidential, but federated.',
-      es: '💧 Como un carril exprés privado: más rápido, confidencial, pero federado.'
-    },
+    borderColor: 'border-cyan-400/20',
+    description: 'Bitcoin sidechain for traders & institutions. Confidential transactions with 1-minute blocks.',
+    descriptionEs: 'Sidechain de Bitcoin para traders e instituciones. Transacciones confidenciales con bloques de 1 minuto.',
+    analogy: '💧 Like a private express lane: faster, confidential, federated.',
+    analogyEs: '💧 Como un carril exprés privado: más rápido, confidencial, federado.',
     features: [
-      { name: '1-min blocks', tooltip: 'Blocks confirmed every minute, not 10' },
-      { name: 'Confidential', tooltip: 'Transaction amounts are hidden by default' },
-      { name: 'L-BTC pegged', tooltip: '1:1 backed by real Bitcoin in federation custody' }
+      { name: '1-min blocks', nameEs: 'Bloques 1-min', tooltip: 'Blocks confirmed every minute, not 10', tooltipEs: 'Bloques confirmados cada minuto, no 10' },
+      { name: 'Confidential', nameEs: 'Confidencial', tooltip: 'Transaction amounts are hidden by default', tooltipEs: 'Montos de transacción ocultos por defecto' },
+      { name: 'L-BTC pegged', nameEs: 'L-BTC respaldado', tooltip: '1:1 backed by real Bitcoin in federation custody', tooltipEs: '1:1 respaldado por Bitcoin real en custodia federada' }
     ],
     stats: [
-      { label: 'Block time', value: '1 min' },
-      { label: 'Finality', value: '2 min' },
-      { label: 'Privacy', value: 'Default' }
+      { label: 'Block time', labelEs: 'Bloque', value: '1 min' },
+      { label: 'Finality', labelEs: 'Finalidad', value: '2 min' },
+      { label: 'Privacy', labelEs: 'Privacidad', value: 'Default' }
     ]
   },
   {
     id: 'l3',
-    name: 'Application Layer (L3)',
-    esName: 'Aplicaciones (L3)',
+    name: 'Application Layer',
+    nameEs: 'Capa de Aplicación',
+    shortName: 'L3',
     icon: Globe,
     color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10 border-purple-500/20',
+    bgColor: 'bg-purple-500/10',
     textColor: 'text-purple-500',
-    description: {
-      en: 'Applications built on top. Wallets, services, and protocols that make Bitcoin useful.',
-      es: 'Aplicaciones construidas encima. Wallets, servicios y protocolos que hacen útil a Bitcoin.'
-    },
-    analogy: {
-      en: '📱 Like apps on your phone: L1 is the phone, L2 the data plan, L3 the apps.',
-      es: '📱 Como apps en tu teléfono: L1 es el teléfono, L2 el plan de datos, L3 las apps.'
-    },
+    borderColor: 'border-purple-500/20',
+    description: 'Applications built on top. Wallets, services, and protocols that make Bitcoin useful.',
+    descriptionEs: 'Aplicaciones construidas encima. Wallets, servicios y protocolos que hacen útil a Bitcoin.',
+    analogy: '📱 Like apps on your phone: L1 is the phone, L2 the data, L3 the apps.',
+    analogyEs: '📱 Como apps en tu teléfono: L1 el teléfono, L2 los datos, L3 las apps.',
     features: [
-      { name: 'Non-custodial wallets', tooltip: 'You control your private keys' },
-      { name: 'DLCs', tooltip: 'Discreet Log Contracts - private smart contracts' },
-      { name: 'RGB/Assets', tooltip: 'Tokens issued on Bitcoin using RGB protocol' }
+      { name: 'Non-custodial', nameEs: 'No-custodial', tooltip: 'You control your private keys', tooltipEs: 'Tú controlas tus llaves privadas' },
+      { name: 'DLCs', nameEs: 'DLCs', tooltip: 'Discreet Log Contracts - private smart contracts', tooltipEs: 'Contratos de Log Discreto - smart contracts privados' },
+      { name: 'RGB/Assets', nameEs: 'RGB/Activos', tooltip: 'Tokens issued on Bitcoin using RGB protocol', tooltipEs: 'Tokens emitidos en Bitcoin usando protocolo RGB' }
     ],
     stats: [
-      { label: 'Wallets', value: '100+' },
-      { label: 'Protocols', value: '30+' },
-      { label: 'Apps', value: '500+' }
+      { label: 'Wallets', labelEs: 'Wallets', value: '100+' },
+      { label: 'Protocols', labelEs: 'Protocolos', value: '30+' },
+      { label: 'Apps', labelEs: 'Apps', value: '500+' }
     ]
   },
 ];
@@ -151,40 +140,55 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
   const [expandedLayer, setExpandedLayer] = useState<string | null>(null);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
+  // 🐱 FIX #1: Cerrar tooltip al cambiar de layer
+  const handleExpand = useCallback((layerId: string) => {
+    setExpandedLayer(prev => prev === layerId ? null : layerId);
+    setActiveTooltip(null);
+  }, []);
+
   const t = {
     en: {
       title: 'Bitcoin Layers',
       subtitle: 'A stack of technologies working together.',
       tip: 'Lightning and Liquid are layers ON TOP of Bitcoin — they extend, never replace it.',
+      expand: 'Click to expand',
       l1Note: 'The foundation. All transactions eventually settle here.',
       lightningNote: 'Built ON TOP of Bitcoin. Not a separate token!',
       liquidNote: 'Federated sidechain. Faster and private, but requires trust in federation.',
       l3Note: 'Applications that make Bitcoin usable day-to-day.',
+      footer: '⚡ Lightning extends Bitcoin — Liquid complements it — Both settle to L1 ⚡'
     },
     es: {
       title: 'Capas de Bitcoin',
       subtitle: 'Un stack de tecnologías trabajando juntas.',
       tip: 'Lightning y Liquid son capas SOBRE Bitcoin — extienden, nunca reemplazan.',
+      expand: 'Clic para expandir',
       l1Note: 'La base. Todas las transacciones eventualmente se liquidan aquí.',
       lightningNote: 'Construida SOBRE Bitcoin. ¡No es un token separado!',
       liquidNote: 'Sidechain federada. Más rápida y privada, pero requiere confianza en la federación.',
       l3Note: 'Aplicaciones que hacen útil a Bitcoin en el día a día.',
+      footer: '⚡ Lightning extiende Bitcoin — Liquid lo complementa — Ambos liquidan a L1 ⚡'
     }
   }[lang];
 
   const getNote = (layerId: string) => {
-    switch (layerId) {
-      case 'l1': return t.l1Note;
-      case 'l2-lightning': return t.lightningNote;
-      case 'l2-liquid': return t.liquidNote;
-      case 'l3': return t.l3Note;
-      default: return '';
-    }
+    const notes: Record<string, string> = {
+      'l1': t.l1Note,
+      'l2-lightning': t.lightningNote,
+      'l2-liquid': t.liquidNote,
+      'l3': t.l3Note
+    };
+    return notes[layerId] || '';
   };
 
+  const getFeatureName = (feature: LayerFeature) => lang === 'es' ? feature.nameEs : feature.name;
+  const getFeatureTooltip = (feature: LayerFeature) => lang === 'es' ? feature.tooltipEs : feature.tooltip;
+  const getStatLabel = (stat: Layer['stats'][0]) => lang === 'es' ? stat.labelEs : stat.label;
+
   return (
-    <section className="w-full bg-slate-950 py-12 sm:py-16 lg:py-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+    // 🐱 FIX #2: ID para navegación por anchor
+    <section id="protocol" className="w-full bg-slate-950 py-12 sm:py-16 lg:py-20 scroll-mt-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -196,7 +200,7 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
             <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-[#f7931a]" />
             <span className="text-sm sm:text-lg font-mono tracking-wider text-slate-200">{t.title}</span>
           </div>
-          <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed px-2">
+          <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
             {t.subtitle}
           </p>
         </motion.div>
@@ -206,28 +210,29 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="mb-8 sm:mb-12 p-4 sm:p-6 bg-blue-950/30 border border-blue-500/20 rounded-2xl flex items-start gap-3 sm:gap-4"
+          className="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-950/30 border border-blue-500/20 rounded-2xl flex items-start gap-3"
         >
-          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+          <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
           <p className="text-sm sm:text-base text-blue-200 leading-relaxed">{t.tip}</p>
         </motion.div>
 
-        {/* Layers container */}
-        <div className="relative bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-6 lg:p-8">
-          {/* L2 Label */}
-          <div className="absolute -left-2 sm:-left-4 top-1/3 bottom-1/4 w-8 sm:w-12 flex items-center justify-center">
-            <div className="transform -rotate-90 whitespace-nowrap">
-              <span className="text-xs font-mono text-slate-600 tracking-widest uppercase">Layer 2 Solutions</span>
-            </div>
-          </div>
+        {/* 🐱 FIX #3: Label L2 horizontal en vez de vertical rotado */}
+        <div className="mb-4 sm:mb-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-700 to-slate-700" />
+          <span className="text-xs sm:text-sm font-mono text-slate-500 uppercase tracking-widest whitespace-nowrap">
+            Layer 2 Solutions
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-slate-700 to-slate-700" />
+        </div>
 
+        {/* Layers container */}
+        <div className="bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-6 lg:p-8">
           {/* Layers stack */}
-          <div className="space-y-4 sm:space-y-6 pl-4 sm:pl-8">
+          <div className="space-y-4 sm:space-y-6">
             {layers.map((layer, index) => {
               const Icon = layer.icon;
               const isExpanded = expandedLayer === layer.id;
-              const isLightning = layer.id === 'l2-lightning';
-              const isLiquid = layer.id === 'l2-liquid';
+              const isL2 = layer.id === 'l2-lightning' || layer.id === 'l2-liquid';
 
               return (
                 <motion.div
@@ -239,96 +244,110 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
                   className="relative"
                 >
                   {/* Connector line */}
-                  {index < layers.length - 1 && layer.id !== 'l2-lightning' && (
-                    <div className="hidden sm:block absolute left-6 sm:left-8 top-full w-px h-4 sm:h-6 bg-gradient-to-b from-[#f7931a]/40 to-transparent" />
+                  {index < layers.length - 1 && (
+                    <div className="absolute left-5 sm:left-6 top-full w-px h-4 sm:h-6 bg-gradient-to-b from-[#f7931a]/40 to-transparent" />
                   )}
 
                   {/* Layer card */}
                   <div
-                    onClick={() => setExpandedLayer(isExpanded ? null : layer.id)}
+                    onClick={() => handleExpand(layer.id)}
                     className={`
-                      group relative p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer
-                      ${layer.bgColor}
-                      ${isLightning ? 'ring-1 sm:ring-2 ring-blue-500/30' : ''}
-                      ${isLiquid ? 'ring-1 sm:ring-2 ring-cyan-400/30' : ''}
-                      hover:border-opacity-60
+                      group relative p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer
+                      ${layer.bgColor} ${layer.borderColor}
+                      ${isL2 ? 'ring-1 sm:ring-2 ring-blue-500/20' : ''}
+                      hover:border-opacity-60 active:scale-[0.99]
                     `}
+                    role="button"
+                    aria-expanded={isExpanded}
                   >
-                    {(isLightning || isLiquid) && (
+                    {/* L2 Badge */}
+                    {isL2 && (
                       <div className={`
-                        absolute -top-2 -right-2 sm:-top-3 sm:-right-3 px-2 sm:px-3 py-1 text-white text-xs font-mono rounded-lg shadow-lg flex items-center gap-1
-                        ${isLightning ? 'bg-gradient-to-r from-blue-600 to-[#f7931a]' : 'bg-gradient-to-r from-cyan-500 to-blue-600'}
+                        absolute -top-2 right-3 sm:-top-3 sm:right-4 
+                        px-2 sm:px-3 py-0.5 sm:py-1 
+                        text-white text-[10px] sm:text-xs font-mono rounded-full shadow-lg
+                        flex items-center gap-1
+                        ${layer.id === 'l2-lightning'
+                          ? 'bg-gradient-to-r from-blue-600 to-[#f7931a]'
+                          : 'bg-gradient-to-r from-cyan-500 to-blue-600'}
                       `}>
-                        <Bitcoin className="w-3 h-3" />
-                        <span className="hidden sm:inline">Built on Bitcoin</span>
-                        <span className="sm:hidden">L2</span>
+                        <Bitcoin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        <span>L2</span>
                       </div>
                     )}
 
                     {/* Main content */}
-                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    <div className="flex gap-3 sm:gap-4">
                       {/* Icon */}
                       <div className={`
-                        flex-shrink-0 p-3 sm:p-4 rounded-xl bg-slate-900 border-2 w-fit
-                        ${isLightning ? 'border-blue-500/40' : isLiquid ? 'border-cyan-400/40' : 'border-slate-700'}
+                        flex-shrink-0 p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-slate-900 border-2 h-fit
+                        ${isL2 ? layer.borderColor.replace('20', '40') : 'border-slate-700'}
                       `}>
-                        <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${layer.color}`} />
+                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${layer.color}`} />
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         {/* Header */}
-                        <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
-                          <h3 className={`text-lg sm:text-2xl font-bold font-mono ${layer.color}`}>
-                            {lang === 'es' ? layer.esName : layer.name}
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <h3 className={`text-base sm:text-xl lg:text-2xl font-bold font-mono ${layer.color}`}>
+                            {lang === 'es' ? layer.nameEs : layer.name}
                           </h3>
-                          <ChevronDown
-                            className={`w-5 h-5 text-slate-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-                          />
+                          <div className="flex items-center gap-1 text-slate-500">
+                            <span className="text-[10px] sm:text-xs opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">
+                              {t.expand}
+                            </span>
+                            <ChevronDown
+                              className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          </div>
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-3">
-                          {layer.description[lang]}
+                        <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-2">
+                          {lang === 'es' ? layer.descriptionEs : layer.description}
                         </p>
 
-                        {/* Analogy */}
-                        <p className="text-xs sm:text-sm text-slate-500 italic mb-4">
-                          {layer.analogy[lang]}
+                        {/* Analogy - más visible */}
+                        <p className="text-sm text-slate-500 italic mb-3 sm:mb-4">
+                          {lang === 'es' ? layer.analogyEs : layer.analogy}
                         </p>
 
-                        {/* Features */}
-                        <div className="flex flex-wrap gap-2 mb-4">
+                        {/* Features pills */}
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
                           {layer.features.map((feature) => (
                             <button
                               key={feature.name}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setActiveTooltip(activeTooltip === feature.name ? null : feature.name);
+                                const key = `${layer.id}-${feature.name}`;
+                                setActiveTooltip(activeTooltip === key ? null : key);
                               }}
                               className={`
-                                text-xs px-3 py-1.5 rounded-full border font-mono transition-all
-                                ${activeTooltip === feature.name
+                                text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border font-mono transition-all
+                                ${activeTooltip === `${layer.id}-${feature.name}`
                                   ? 'bg-orange-500 border-orange-500 text-black'
                                   : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
                                 }
                               `}
                             >
-                              {feature.name}
+                              {getFeatureName(feature)}
                             </button>
                           ))}
                         </div>
 
                         {/* Tooltip */}
                         <AnimatePresence>
-                          {activeTooltip && (
+                          {activeTooltip?.startsWith(layer.id) && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="mb-4 p-3 bg-slate-800 rounded-lg text-xs text-slate-300"
+                              className="mt-3 p-2.5 sm:p-3 bg-slate-800 rounded-lg text-xs text-slate-300"
                             >
-                              {layer.features.find(f => f.name === activeTooltip)?.tooltip}
+                              {getFeatureTooltip(layer.features.find(f =>
+                                activeTooltip === `${layer.id}-${f.name}`
+                              )!)}
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -342,33 +361,38 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
                               exit={{ opacity: 0, height: 0 }}
                               className="overflow-hidden"
                             >
-                              <div className="pt-4 border-t border-slate-700/50">
-                                {/* Stats */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                                  {layer.stats?.map((stat) => (
-                                    <div key={stat.label} className="text-center p-3 sm:p-4 bg-slate-900/60 rounded-xl border border-slate-700">
-                                      <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">{stat.label}</div>
-                                      <div className={`text-xl sm:text-2xl font-mono font-semibold ${layer.textColor}`}>{stat.value}</div>
+                              <div className="pt-4 mt-4 border-t border-slate-700/50">
+                                {/* Stats - 3 cols en móvil también pero más compacto */}
+                                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+                                  {layer.stats.map((stat) => (
+                                    <div key={stat.label} className="text-center p-2 sm:p-3 bg-slate-900/60 rounded-lg sm:rounded-xl border border-slate-700">
+                                      <div className="text-[10px] sm:text-xs uppercase tracking-wider text-slate-500 mb-0.5 truncate">
+                                        {getStatLabel(stat)}
+                                      </div>
+                                      <div className={`text-base sm:text-xl lg:text-2xl font-mono font-semibold ${layer.textColor}`}>
+                                        {stat.value}
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
 
-                                {/* Features detail */}
-                                <div className="space-y-2 mb-4">
+                                {/* Features detail - lista compacta */}
+                                <div className="space-y-1.5 sm:space-y-2 mb-4">
                                   {layer.features.map((feature) => (
-                                    <div key={feature.name} className="flex gap-3 text-sm">
+                                    <div key={feature.name} className="flex gap-2 text-xs sm:text-sm">
                                       <span className={layer.textColor}>→</span>
-                                      <div>
-                                        <span className="font-mono text-slate-300">{feature.name}:</span>
-                                        <span className="text-slate-500 ml-2">{feature.tooltip}</span>
+                                      <div className="min-w-0">
+                                        <span className="font-mono text-slate-300">{getFeatureName(feature)}:</span>
+                                        <span className="text-slate-500 ml-1 sm:ml-2">{getFeatureTooltip(feature)}</span>
                                       </div>
                                     </div>
                                   ))}
                                 </div>
 
                                 {/* Note */}
-                                <div className="p-3 sm:p-4 bg-slate-900/50 border-l-4 border-[#f7931a] rounded-r-xl">
-                                  <p className="text-xs sm:text-sm text-slate-400">
+                                <div className="p-2.5 sm:p-3 bg-slate-900/50 border-l-3 sm:border-l-4 border-[#f7931a] rounded-r-lg sm:rounded-r-xl">
+                                  <p className="text-xs sm:text-sm text-slate-400 flex items-start gap-2">
+                                    <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 text-[#f7931a]" />
                                     {getNote(layer.id)}
                                   </p>
                                 </div>
@@ -389,29 +413,29 @@ export function ProtocolLayers({ lang = 'en' }: ProtocolLayersProps) {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="mt-8 sm:mt-12 pt-6 border-t border-slate-800"
+            className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-slate-800"
           >
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-slate-500 font-mono">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                <span>L1: Settlement</span>
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-slate-500 font-mono">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-orange-500" />
+                <span>L1</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
                 <span>Lightning</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-cyan-400" />
                 <span>Liquid</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                <span>L3: Apps</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                <span>L3</span>
               </div>
             </div>
 
-            <p className="text-center mt-4 sm:mt-6 text-xs text-slate-600 font-mono">
-              ⚡ Lightning extends Bitcoin — Liquid complements it — Both settle to L1 ⚡
+            <p className="text-center mt-4 sm:mt-6 text-xs text-slate-600 font-mono px-2">
+              {t.footer}
             </p>
           </motion.div>
         </div>

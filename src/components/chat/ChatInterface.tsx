@@ -1,4 +1,3 @@
-// src/components/chat/ChatInterface.tsx
 'use client';
 
 import { useState, useRef, useEffect, FormEvent, useCallback, useMemo } from 'react';
@@ -188,27 +187,29 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
   return (
     <section
       id="chat-section"
-      className="relative py-24 px-4 md:px-6 bg-black scroll-mt-20"
+      className="relative py-12 sm:py-16 md:py-24 px-3 sm:px-4 md:px-6 bg-black scroll-mt-20"
     >
       <div className="max-w-5xl mx-auto">
-        {/* Header invitador */}
+        {/* Header invitador - OPTIMIZADO PARA MÓVIL */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
         >
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-slate-900 border border-[#f7931a]/30 rounded-3xl mb-6">
-            <Zap className="w-6 h-6 text-[#f7931a]" />
-            <span className="text-lg font-mono text-[#f7931a] tracking-wider">Bitcoin Agent Online</span>
+          <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-slate-900 border border-[#f7931a]/30 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6">
+            <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-[#f7931a]" />
+            <span className="text-sm sm:text-lg font-mono text-[#f7931a] tracking-wider">Bitcoin Agent Online</span>
           </div>
 
-          <h2 className="text-5xl md:text-6xl font-bold text-white font-mono tracking-[-1px] mb-4">
+          {/* 🐱 FIX #1: Tamaño de texto responsive - no más gigantismo en móvil */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-mono tracking-[-1px] mb-3 sm:mb-4">
             Talk to Bitcoin Agent
           </h2>
 
-          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          {/* 🐱 FIX #2: Subtítulo más compacto en móvil */}
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-1 sm:px-0">
             {lang === 'en'
               ? "Your direct line to Bitcoin wisdom. Ask freely — from sats math to privacy mastery, Lightning magic to monetary sovereignty. I'm here to teach, not preach. What's on your mind? ⚡"
               : "Tu línea directa a la sabiduría Bitcoin. Pregunta sin miedo — desde matemáticas de sats hasta maestría en privacidad, magia Lightning y soberanía monetaria. Estoy aquí para enseñar, no para predicar. ¿Qué tienes en mente? ⚡"}
@@ -223,33 +224,41 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
           transition={{ duration: 0.9, delay: 0.2 }}
         >
           <TerminalWindow lines={terminalLines} isLoading={isLoading}>
-            <form onSubmit={handleSubmit} className="flex items-center gap-3 bg-slate-900 border-t border-slate-800 pt-5">
-              <span className="text-[#f7931a] font-mono text-xl font-bold">{'>'}</span>
+            {/* 🐱 FIX #3: Form más compacto en móvil - flex-col en vez de flex-row en xs */}
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 bg-slate-900 border-t border-slate-800 pt-3 sm:pt-5"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[#f7931a] font-mono text-lg sm:text-xl font-bold flex-shrink-0">{'>'}</span>
 
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={dict.placeholder || (lang === 'en' ? "Ask anything about Bitcoin... (e.g. 'Explain halving in simple terms')" : "Pregunta lo que sea sobre Bitcoin... (ej. 'Explica el halving fácil')")}
-                disabled={isLoading}
-                className="flex-1 bg-transparent text-white font-mono text-lg outline-none placeholder:text-slate-600 caret-[#f7931a] selection:bg-[#f7931a]/30"
-                autoFocus
-              />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={dict.placeholder || (lang === 'en' ? "Ask about Bitcoin..." : "Pregunta sobre Bitcoin...")}
+                  disabled={isLoading}
+                  className="flex-1 bg-transparent text-white font-mono text-base sm:text-lg outline-none placeholder:text-slate-500 caret-[#f7931a] selection:bg-[#f7931a]/30 min-w-0"
+                  autoFocus
+                />
+              </div>
 
+              {/* 🐱 FIX #4: Botón full-width en móvil pequeño, normal en desktop */}
               <motion.button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black font-mono font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black font-mono font-bold rounded-xl sm:rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 flex-shrink-0"
               >
                 {isLoading ? (
-                  <span>Thinking...</span>
+                  <span className="text-sm sm:text-base">Thinking...</span>
                 ) : (
                   <>
-                    Send
-                    <Send className="w-5 h-5" />
+                    <span className="sm:hidden">Send</span>
+                    <span className="hidden sm:inline">Send</span>
+                    <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                   </>
                 )}
               </motion.button>
