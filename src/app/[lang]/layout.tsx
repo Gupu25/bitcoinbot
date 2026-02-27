@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Locale, getDictionary, isLocale, defaultLocale } from '@/lib/i18n/config';
 import { Providers } from './providers';
 import { HiddenMenu } from '@/components/navigation/HiddenMenu';
+import { ScrollToTop } from '@/components/navigation/ScrollToTop';
 
 // 🐱 FIX #1: Eliminar force-dynamic para static generation ultra-rápida
 // Solo usar 'force-dynamic' si REALMENTE necesitas datos dinámicos en cada request
@@ -142,6 +143,8 @@ export default async function LangLayout({
       // 🐱 FIX #12: Colores estándar de Tailwind en vez de clases custom indefinidas
       >
         <Providers>
+          {/* Scroll reset — client component, no SSR cost */}
+          <ScrollToTop />
           {/* 🐱 FIX #13: HiddenMenu DENTRO de Providers para acceso a context */}
           <HiddenMenu lang={lang as Locale} />
           {children}

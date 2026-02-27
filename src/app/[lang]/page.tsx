@@ -1,5 +1,5 @@
 import { HeroSection } from '@/components/hero/HeroSection';
-import { CircularEconomiesCarousel } from '@/components/economies/CircularEconomiesCarousel';
+import { PartnersCarousel } from '@/components/economies/CircularEconomiesCarousel';
 import { MarketSection } from '@/components/markets/MarketSection';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { TipJar } from '@/components/tip-jar/TipJar';
@@ -57,7 +57,7 @@ export default async function Home({ params }: { params: { lang: string } }) {
 
       {/* Comunidades – Prueba social viva */}
       <section id="economies" className="scroll-mt-20">
-        <CircularEconomiesCarousel lang={lang} />
+        <PartnersCarousel lang={lang} />
       </section>
 
       {/* Mercado – Datos en vivo */}

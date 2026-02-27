@@ -4,103 +4,75 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bitcoin,
-  MapPin,
   ExternalLink,
   ChevronLeft,
   ChevronRight,
   Pause,
   Play,
   Loader2,
-  Globe,
   Zap,
+  Globe,
+  CreditCard,
+  Wallet,
 } from 'lucide-react';
 
 // ============================================================================
-// TYPES
+// TYPES - Solo Partners Comerciales
 // ============================================================================
-type Economy = {
+type Partner = {
   id: string;
-  type: 'economy';
   name: string;
+  nameEs: string;
   description: string;
+  descriptionEs: string;
   website: string;
-  location: string;
-  status: 'active' | 'coming';
-  ecosystem: string;
+  referralUrl?: string;
+  features: string[];
+  featuresEs: string[];
+  color: string;
+  badge?: string;
+  badgeEs?: string;
 };
 
-type Exchange = {
-  id: string;
-  type: 'exchange';
-  name: string;
-  description: string;
-  website: string;
-  widgetUrl?: string;
-};
-
-type Item = Economy | Exchange;
-
 // ============================================================================
-// DATA
+// DATA - Solo 3 Partners: Kapitalex, Changelly, Aureo
 // ============================================================================
-const items: Item[] = [
-  {
-    id: 'bitcoin-beach',
-    type: 'economy',
-    name: 'Bitcoin Beach',
-    description:
-      'La primera economía circular de Bitcoin en El Zonte, El Salvador. Pionera en demostrar que Bitcoin puede funcionar como moneda local en una comunidad.',
-    website: 'https://www.bitcoinbeach.com',
-    location: 'El Zonte, El Salvador',
-    status: 'active',
-    ecosystem: 'Lightning Network',
-  },
-  {
-    id: 'bitcoin-jungle',
-    type: 'economy',
-    name: 'Bitcoin Jungle',
-    description:
-      'Economía circular Bitcoin en la costa del Pacífico de Costa Rica. Más de 200 negocios aceptan Bitcoin con Lightning en la región de Uvita y Dominical.',
-    website: 'https://bitcoinjungle.app',
-    location: 'Costa Rica',
-    status: 'active',
-    ecosystem: 'Lightning Network',
-  },
-  {
-    id: 'bitcoin-lagos',
-    type: 'economy',
-    name: 'Bitcoin Lagos',
-    description:
-      'Comunidad Bitcoin creciente en Nigeria que trabaja para empoderar a los ciudadanos con herramientas financieras descentralizadas.',
-    website: 'https://bitcoinlagos.io',
-    location: 'Lagos, Nigeria',
-    status: 'coming',
-    ecosystem: 'Bitcoin + Lightning',
-  },
+const partners: Partner[] = [
   {
     id: 'kapitalex',
-    type: 'exchange',
     name: 'Kapitalex',
-    description:
-      'Compra y vende Bitcoin instantáneamente en México. Préstamos colateralizados sin buró de crédito.',
-    website: 'https://www.kapitalex.com/#/register?ref=FDHFVSRW5KJANRX',
+    nameEs: 'Kapitalex',
+    description: 'The most trusted Bitcoin platform in Mexico since 2016. Buy, sell, and get instant loans collateralized with your BTC — no credit check required.',
+    descriptionEs: 'La plataforma Bitcoin más confiable de México desde 2016. Compra, vende y obtén préstamos instantáneos con garantía BTC — sin revisar buró de crédito.',
+    website: 'https://www.kapitalex.com',
+    referralUrl: 'https://www.kapitalex.com/#/register?ref=FDHFVSRW5KJANRX',
+    features: ['🇲🇽 Mexico', 'BTC Loans', 'MXNT + USDT', 'Instant SPEI'],
+    featuresEs: ['🇲🇽 México', 'Préstamos BTC', 'MXNT + USDT', 'SPEI Instantáneo'],
+    color: '#ff6b35',
+    badge: 'NEW',
+    badgeEs: 'NUEVO',
   },
   {
     id: 'changelly',
-    type: 'exchange',
     name: 'Changelly',
-    description:
-      'Compra Bitcoin al instante con pesos mexicanos o dólares. Widget integrado con nuestra cuenta de referido.',
+    nameEs: 'Changelly',
+    description: 'Global instant exchange. Buy Bitcoin with credit card, debit card, or bank transfer. Available in Mexico and LATAM with competitive rates.',
+    descriptionEs: 'Exchange global instantáneo. Compra Bitcoin con tarjeta de crédito, débito o transferencia bancaria. Disponible en México y LATAM con tarifas competitivas.',
     website: 'https://changelly.com',
-    widgetUrl: 'https://widget.changelly.com',
+    features: ['🌎 Global', 'Card/SPEI', 'No KYC basic', 'Best rates'],
+    featuresEs: ['🌎 Global', 'Tarjeta/SPEI', 'Sin KYC básico', 'Mejores tasas'],
+    color: '#f7931a',
   },
   {
     id: 'aureo',
-    type: 'exchange',
     name: 'Aureo',
-    description:
-      'Compra y vende Bitcoin instantáneamente con pesos mexicanos vía SPEI y Lightning.',
+    nameEs: 'Aureo',
+    description: 'Lightning-fast Bitcoin for Mexicans. Buy with SPEI, withdraw via Lightning Network. The easiest on-ramp for beginners.',
+    descriptionEs: 'Bitcoin rápido como el rayo para mexicanos. Compra con SPEI, retira vía Lightning Network. La rampa de acceso más fácil para principiantes.',
     website: 'https://www.aureobitcoin.com',
+    features: ['🇲🇽 Mexico', 'Lightning', 'SPEI 24/7', 'Low fees'],
+    featuresEs: ['🇲🇽 México', 'Lightning', 'SPEI 24/7', 'Bajas comisiones'],
+    color: '#f59e0b',
   },
 ];
 
@@ -137,217 +109,117 @@ const transition = {
 // SUB-COMPONENTS
 // ============================================================================
 
-function KapitalexCard() {
+function PartnerCard({ partner, lang }: { partner: Partner; lang: 'en' | 'es' }) {
+  const isKapitalex = partner.id === 'kapitalex';
+  const features = lang === 'es' ? partner.featuresEs : partner.features;
+  const description = lang === 'es' ? partner.descriptionEs : partner.description;
+  const badge = lang === 'es' ? partner.badgeEs : partner.badge;
+
   return (
-    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-orange-500/30 transition-colors">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff6b35]/5 rounded-full blur-3xl" />
+    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-orange-500/30 transition-all duration-300">
+      {/* Background glow */}
+      <div
+        className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-10"
+        style={{ backgroundColor: partner.color }}
+      />
 
-      <div className="flex items-start gap-4 mb-4 relative z-10">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#ff6b35]/10 border border-[#ff6b35]/20">
-          <Bitcoin className="w-6 h-6 text-[#ff6b35]" />
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-5 relative z-10">
+        <div
+          className="p-3 rounded-xl flex-shrink-0 border-2"
+          style={{
+            backgroundColor: `${partner.color}15`,
+            borderColor: `${partner.color}30`
+          }}
+        >
+          <Bitcoin className="w-7 h-7" style={{ color: partner.color }} />
         </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Kapitalex</h3>
-            <motion.span
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ repeat: Infinity, repeatType: 'reverse', duration: 1.5 }}
-              className="text-[8px] bg-green-500 text-black px-1.5 py-0.5 rounded-full font-bold"
-            >
-              NUEVO
-            </motion.span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xl sm:text-2xl font-bold text-white font-mono">
+              {lang === 'es' ? partner.nameEs : partner.name}
+            </h3>
+            {badge && (
+              <motion.span
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ repeat: Infinity, repeatType: 'reverse', duration: 1.5 }}
+                className="text-[10px] bg-green-500 text-black px-2 py-0.5 rounded-full font-bold"
+              >
+                {badge}
+              </motion.span>
+            )}
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">Bitcoin en México desde 2016</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {partner.id === 'kapitalex' && (lang === 'es' ? 'Desde 2016' : 'Since 2016')}
+            {partner.id === 'changelly' && (lang === 'es' ? 'Exchange Global' : 'Global Exchange')}
+            {partner.id === 'aureo' && (lang === 'es' ? 'Lightning Native' : 'Lightning Native')}
+          </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
-          🇲🇽 México
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
-          Préstamos con BTC
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
-          MXNT + USDT
-        </span>
+      {/* Features pills */}
+      <div className="flex flex-wrap gap-2 mb-5 relative z-10">
+        {features.map((feature, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-slate-300"
+          >
+            {feature}
+          </span>
+        ))}
       </div>
 
-      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1 relative z-10">
-        Compra y vende Bitcoin instantáneamente con bancos mexicanos.
-        Obtén préstamos en MXNT usando tu Bitcoin como garantía,
-        sin historial crediticio. La plataforma más confiable de México.
+      {/* Description */}
+      <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-6 flex-1 relative z-10">
+        {description}
       </p>
 
+      {/* CTA Button */}
       <a
-        href="https://www.kapitalex.com/#/register?ref=FDHFVSRW5KJANRX"
+        href={partner.referralUrl || partner.website}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative z-10 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#ff6b35] to-[#f7931a] hover:from-[#ff8c5a] hover:to-[#ffa64d] text-white text-sm font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-orange-500/20"
+        className="relative z-10 w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm sm:text-base font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+        style={{
+          backgroundColor: partner.color,
+          color: partner.id === 'changelly' ? 'black' : 'white',
+          boxShadow: `0 10px 30px -10px ${partner.color}40`
+        }}
       >
-        Registrarse con referral
+        {isKapitalex
+          ? (lang === 'es' ? 'Registrarse con Referral' : 'Register with Referral')
+          : (lang === 'es' ? 'Visitar Sitio' : 'Visit Website')
+        }
         <ExternalLink className="w-4 h-4" />
       </a>
 
-      <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-20">
+      {/* Partner badge */}
+      <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg z-20">
         🎯 Partner
       </div>
 
-      <p className="text-[10px] text-slate-600 mt-4 text-center font-mono relative z-10">
-        Al registrarte apoyas a BOB • Préstamos rápidos sin buró de crédito
+      {/* Footer note */}
+      <p className="text-[10px] sm:text-xs text-slate-600 mt-4 text-center font-mono relative z-10">
+        {isKapitalex
+          ? (lang === 'es' ? 'Al registrarte apoyas a BOB • Sin buró de crédito' : 'Registering supports BOB • No credit check')
+          : (lang === 'es' ? 'Partner oficial de Bitcoin Agent' : 'Official Bitcoin Agent Partner')
+        }
       </p>
-    </div>
-  );
-}
-
-function ChangellyWidget() {
-  return (
-    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-orange-500/30 transition-colors">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#f7931a]/5 rounded-full blur-3xl" />
-
-      <div className="flex items-start gap-4 mb-4 relative z-10">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-[#f7931a]/10 border border-[#f7931a]/20">
-          <Bitcoin className="w-6 h-6 text-[#f7931a]" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Changelly</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Exchange instantáneo global</p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
-          🌎 Global
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-white">
-          Tarjeta / SPEI
-        </span>
-      </div>
-
-      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1 relative z-10">
-        Compra Bitcoin al instante con tarjeta de crédito, débito o transferencia bancaria.
-        Servicio disponible en México y LATAM. Sin registro complejo.
-      </p>
-
-      <a
-        href="https://changelly.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative z-10 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black text-sm font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-      >
-        Comprar Bitcoin
-        <ExternalLink className="w-4 h-4" />
-      </a>
-    </div>
-  );
-}
-
-function AureoCard() {
-  return (
-    <div className="relative flex flex-col h-full p-6 sm:p-8 bg-slate-900/60 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-amber-500/30 transition-colors">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl" />
-
-      <div className="flex items-start gap-4 mb-4 relative z-10">
-        <div className="p-2.5 rounded-xl flex-shrink-0 bg-amber-500/10 border border-amber-500/20">
-          <Bitcoin className="w-6 h-6 text-amber-400" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-bold text-white font-mono">Aureo</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Bitcoin rápido en México</p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-500/20 text-blue-400 border-blue-500/30">
-          🇲🇽 México
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
-          SPEI
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
-          Lightning
-        </span>
-      </div>
-
-      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1">
-        Compra Bitcoin al instante con SPEI mexicano. Retiros vía Lightning Network
-        para transacciones rápidas y económicas. Ideal para mexicanos que quieren
-        empezar sin complicaciones.
-      </p>
-
-      <a
-        href="https://www.aureobitcoin.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors"
-      >
-        Visitar Aureo
-        <ExternalLink className="w-4 h-4" />
-      </a>
-    </div>
-  );
-}
-
-// Economy Card Component
-function EconomyCard({ item }: { item: Economy }) {
-  return (
-    <div className="flex flex-col h-full p-6 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#f7931a]/10 border border-[#f7931a]/20">
-            <Globe className="w-6 h-6 text-[#f7931a]" />
-          </div>
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold text-white font-mono">{item.name}</h3>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-              <MapPin className="w-3 h-3" />
-              {item.location}
-            </div>
-          </div>
-        </div>
-        <span
-          className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${item.status === 'active'
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-            }`}
-        >
-          {item.status === 'active' ? 'Activo' : 'Próximamente'}
-        </span>
-      </div>
-
-      <div className="mb-4">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-600 bg-slate-800 text-white">
-          <Zap className="w-3 h-3 text-[#f7931a]" />
-          {item.ecosystem}
-        </span>
-      </div>
-
-      <p className="text-sm text-slate-300 leading-relaxed mb-6 flex-1">{item.description}</p>
-
-      <a
-        href={item.website}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-colors border border-slate-700"
-      >
-        Visitar sitio
-        <ExternalLink className="w-4 h-4" />
-      </a>
     </div>
   );
 }
 
 // ============================================================================
-// MAIN COMPONENT
+// MAIN COMPONENT - Renombrado a PartnersCarousel
 // ============================================================================
-export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' }) {
+export function PartnersCarousel({ lang = 'en' }: { lang?: 'en' | 'es' }) {
   const [[current, direction], setCurrent] = useState<[number, number]>([0, 0]);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const total = items.length;
-  const currentItem = items[current] ?? null;
+  const total = partners.length;
+  const currentPartner = partners[current];
 
   const paginate = useCallback(
     (newDirection: number) => {
@@ -359,13 +231,13 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
     [total]
   );
 
-  // Auto-advance
+  // Auto-advance cada 8s (más tiempo para leer)
   useEffect(() => {
     if (isPaused) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
-    intervalRef.current = setInterval(() => paginate(1), 6000);
+    intervalRef.current = setInterval(() => paginate(1), 8000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -373,106 +245,128 @@ export function CircularEconomiesCarousel({ lang = 'en' }: { lang?: 'en' | 'es' 
 
   const labels = {
     en: {
-      title: 'Circular Economies',
-      subtitle: 'Real-world Bitcoin communities & exchanges',
+      title: 'Buy Bitcoin',
+      subtitle: 'Trusted partners to stack sats',
       pause: 'Pause',
       play: 'Play',
-      footer: '🤝 Our partners help us maintain BOB • Thanks for supporting using their links',
+      footer: '🤝 These partners help us maintain BOB • Thank you for supporting them',
     },
     es: {
-      title: 'Economías Circulares',
-      subtitle: 'Comunidades Bitcoin reales e intercambios',
+      title: 'Comprar Bitcoin',
+      subtitle: 'Partners confiables para acumular sats',
       pause: 'Pausar',
       play: 'Reanudar',
-      footer: '🤝 Nuestros partners nos ayudan a mantener BOB • Gracias por apoyar usando sus links',
+      footer: '🤝 Estos partners nos ayudan a mantener BOB • Gracias por apoyarlos',
     },
   };
   const t = labels[lang];
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div>
-          <h2 className="text-xl font-bold text-white font-mono">{t.title}</h2>
-          <p className="text-xs text-slate-500 mt-0.5">{t.subtitle}</p>
-        </div>
-        <button
-          onClick={() => setIsPaused((p) => !p)}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          aria-label={isPaused ? t.play : t.pause}
-        >
-          {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-        </button>
-      </div>
-
-      {/* Carousel */}
-      <div className="relative w-full" style={{ minHeight: '400px' }}>
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div
-            key={current}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={transition}
-            className="absolute inset-0"
+    <section className="w-full py-12 sm:py-16 lg:py-20 bg-slate-950 border-t border-slate-800/70">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white font-mono mb-1">
+              {t.title}
+            </h2>
+            <p className="text-sm sm:text-base text-slate-500">{t.subtitle}</p>
+          </div>
+          <button
+            onClick={() => setIsPaused((p) => !p)}
+            className="self-start sm:self-auto p-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all"
+            aria-label={isPaused ? t.play : t.pause}
           >
-            {!currentItem ? (
-              <div className="flex items-center justify-center h-full text-slate-500">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : currentItem.type === 'economy' ? (
-              <EconomyCard item={currentItem as Economy} />
-            ) : (
-              <>
-                {currentItem.id === 'kapitalex' && <KapitalexCard />}
-                {currentItem.id === 'changelly' && <ChangellyWidget />}
-                {currentItem.id === 'aureo' && <AureoCard />}
-              </>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+          </button>
+        </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-between mt-4 px-1">
-        <button
-          onClick={() => paginate(-1)}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          aria-label="Previous"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+        {/* Carousel Container */}
+        <div className="relative max-w-2xl mx-auto">
+          <div className="relative w-full" style={{ minHeight: '420px' }}>
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={current}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={transition}
+                className="absolute inset-0"
+              >
+                {!currentPartner ? (
+                  <div className="flex items-center justify-center h-full text-slate-500">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  </div>
+                ) : (
+                  <PartnerCard partner={currentPartner} lang={lang} />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-        <div className="flex items-center gap-1.5">
-          {items.map((_, i) => (
+          {/* Controls */}
+          <div className="flex items-center justify-between mt-6 px-1">
             <button
-              key={i}
-              onClick={() => setCurrent(([prev]) => [i, i > prev ? 1 : -1])}
-              className={`rounded-full transition-all duration-300 ${i === current
-                  ? 'w-5 h-2 bg-[#f7931a]'
-                  : 'w-2 h-2 bg-slate-600 hover:bg-slate-400'
-                }`}
-              aria-label={`Slide ${i + 1}`}
-            />
+              onClick={() => paginate(-1)}
+              className="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all active:scale-95"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Dots */}
+            <div className="flex items-center gap-2">
+              {partners.map((partner, i) => (
+                <button
+                  key={partner.id}
+                  onClick={() => setCurrent(([prev]) => [i, i > prev ? 1 : -1])}
+                  className={`rounded-full transition-all duration-300 ${i === current
+                      ? 'w-8 h-2 bg-[#f7931a]'
+                      : 'w-2 h-2 bg-slate-600 hover:bg-slate-400'
+                    }`}
+                  aria-label={`${partner.name} slide`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => paginate(1)}
+              className="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all active:scale-95"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p className="text-xs text-slate-600 text-center mt-8 font-mono">
+          {t.footer}
+        </p>
+
+        {/* 🐱 BONUS: Grid de logos para desktop (trust signals) */}
+        <div className="hidden lg:grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-slate-800">
+          {partners.map((partner) => (
+            <a
+              key={partner.id}
+              href={partner.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 p-4 rounded-xl bg-slate-900/30 border border-slate-800 hover:border-slate-600 transition-all group"
+            >
+              <Bitcoin
+                className="w-5 h-5 transition-colors"
+                style={{ color: partner.color }}
+              />
+              <span className="text-slate-400 group-hover:text-white font-mono text-sm">
+                {partner.name}
+              </span>
+            </a>
           ))}
         </div>
-
-        <button
-          onClick={() => paginate(1)}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          aria-label="Next"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
       </div>
-
-      {/* Footer */}
-      <p className="text-[10px] text-slate-700 text-center mt-6 font-mono">
-        {t.footer}
-      </p>
-    </div>
+    </section>
   );
 }
