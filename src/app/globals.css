@@ -5,8 +5,7 @@
 :root {
   --bitcoin-orange: 249 115 22;
   --bitcoin-amber: 251 191 36;
-  --slate-950: 2 6 23;
-  --slate-900: 15 23 42;
+  /* Removed slate overrides to prevent Tailwind conflict */
 }
 
 @layer base {
