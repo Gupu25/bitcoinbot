@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Info, Shield, Zap, Terminal, ExternalLink } from 'lucide-react';
+import { Menu, X, Info, Shield, Zap, Terminal, TreeDeciduous, Key, Fingerprint, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -13,10 +13,13 @@ interface HiddenMenuProps {
 const translations = {
     en: {
         about: 'About Us',
-        adminZone: 'Admin Zone',
-        immuneDashboard: 'Immune Dashboard',
-        nativeBeacon: 'Native Beacon',
-        challengeZone: 'Challenge Zone',
+        adminZone: 'Developer Tools',
+        immuneDashboard: 'System Monitor',
+        nativeBeacon: 'Network Explorer',
+        seedLab: 'Seed Phrase Lab',
+        merkleLab: 'Merkle Tree Lab',
+        signingLab: 'ECDSA/Schnorr Lab',
+        challengeZone: 'Mining Simulator',
         secured: '🔐 Secured Connection',
         version: 'v2.0.1 • Secure Mode',
         close: 'Close menu',
@@ -24,10 +27,13 @@ const translations = {
     },
     es: {
         about: 'Sobre Nosotros',
-        adminZone: 'Zona Admin',
-        immuneDashboard: 'Panel Inmune',
-        nativeBeacon: 'Beacon Nativo',
-        challengeZone: 'Zona de Desafío',
+        adminZone: 'Herramientas Dev',
+        immuneDashboard: 'Monitor del Sistema',
+        nativeBeacon: 'Explorador de Red',
+        seedLab: 'Lab Frase Semilla',
+        merkleLab: 'Lab Árboles Merkle',
+        signingLab: 'Lab ECDSA/Schnorr',
+        challengeZone: 'Simulador de Minería',
         secured: '🔐 Conexión Segura',
         version: 'v2.0.1 • Modo Seguro',
         close: 'Cerrar menú',
@@ -42,7 +48,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
     const router = useRouter();
     const t = translations[lang];
 
-    // 🐱 FIX #1: Detectar reduced motion para accesibilidad
     useEffect(() => {
         setMounted(true);
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -53,7 +58,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
         return () => mediaQuery.removeEventListener('change', handler);
     }, []);
 
-    // 🐱 FIX #2: Prevenir scroll con padding-right compensación (evita layout shift)
     useEffect(() => {
         if (!isOpen) return;
 
@@ -66,11 +70,9 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
             top: document.body.style.top,
         };
 
-        // Compensar scrollbar para evitar layout shift
         document.body.style.paddingRight = `${scrollbarWidth}px`;
         document.body.style.overflow = 'hidden';
 
-        // 🐱 FIX #3: Prevenir scroll en iOS (necesita position: fixed)
         if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
             const scrollY = window.scrollY;
             document.body.style.position = 'fixed';
@@ -80,7 +82,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
 
         return () => {
             const scrollY = parseInt(document.body.style.top || '0') * -1;
-
             Object.assign(document.body.style, originalStyle);
 
             if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
@@ -91,21 +92,24 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
 
     const handleAdminClick = (path: string) => {
         setIsOpen(false);
-        // 🐱 FIX #4: Pequeño delay para que cierre la animación antes de navegar
-        setTimeout(() => router.push(path), 150);
+        // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
+        const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
+        const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+        setTimeout(() => router.push(fullPath), 150);
     };
 
-    // 🐱 FIX #5: Abrir en nueva pestaña (Ctrl/Cmd + click)
     const handleAdminAuxClick = (e: React.MouseEvent, path: string) => {
         if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            window.open(path, '_blank');
+            // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
+            const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
+            const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+            window.open(fullPath, '_blank');
             setIsOpen(false);
         }
     };
 
     if (!mounted) {
-        // 🐱 FIX #6: Placeholder SSR-friendly para evitar hydration mismatch
         return (
             <div
                 className="fixed top-[calc(1rem+env(safe-area-inset-top))] right-4 w-11 h-11 rounded-full bg-black/80 border border-orange-500/30"
@@ -118,9 +122,17 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
         ? { duration: 0 }
         : { type: 'spring', damping: 25, stiffness: 200 };
 
+    const menuItems = [
+        { title: t.seedLab, path: '/satoshi/seed-lab', icon: Fingerprint, highlight: true },
+        { title: t.merkleLab, path: '/satoshi/merkle-lab', icon: TreeDeciduous },
+        { title: t.signingLab, path: '/satoshi/signing-lab', icon: Key },
+        { title: t.immuneDashboard, path: '/satoshi/immune-dashboard', icon: Shield },
+        { title: t.nativeBeacon, path: '/satoshi/beacon/native', icon: Zap },
+        { title: t.challengeZone, path: '/challenge/pow', icon: Terminal },
+    ];
+
     return (
         <>
-            {/* 🐱 FIX #7: Botón con safe-area-inset y tamaño táctil óptimo */}
             <motion.button
                 initial={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -164,7 +176,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                 </AnimatePresence>
             </motion.button>
 
-            {/* 🐱 FIX #8: Overlay con z-index moderado */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -179,7 +190,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                 )}
             </AnimatePresence>
 
-            {/* 🐱 FIX #9: Panel con safe areas y ancho responsive */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -200,7 +210,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                         aria-modal="true"
                         aria-label="Administration menu"
                     >
-                        {/* Header */}
                         <div className="flex-shrink-0 p-5 sm:p-6 border-b border-slate-800">
                             <h3 className="text-base sm:text-lg font-bold text-[#f7931a] font-mono">
                                 Bitcoin Agent
@@ -210,9 +219,7 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                             </p>
                         </div>
 
-                        {/* 🐱 FIX #10: Scrollable content con flex-1 */}
                         <div className="flex-1 overflow-y-auto p-5 sm:p-6">
-                            {/* Links públicos */}
                             <div className="mb-6 sm:mb-8">
                                 <Link
                                     href={`/${lang}/about`}
@@ -226,29 +233,25 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                                 </Link>
                             </div>
 
-                            {/* Admin Zone */}
                             <div>
                                 <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
                                     {t.adminZone}
                                 </p>
                                 <nav className="space-y-1" aria-label="Admin navigation">
-                                    {[
-                                        { title: t.immuneDashboard, path: '/satoshi/immune-dashboard', icon: Shield },
-                                        { title: t.nativeBeacon, path: '/satoshi/beacon/native', icon: Zap },
-                                        { title: t.challengeZone, path: '/challenge/pow', icon: Terminal },
-                                    ].map((item) => (
+                                    {menuItems.map((item) => (
                                         <button
                                             key={item.title}
                                             onClick={(e) => handleAdminClick(item.path)}
                                             onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
                                text-slate-400 hover:text-[#f7931a] hover:bg-slate-900 
                                transition-colors text-left group
-                               active:scale-[0.98]"
+                               active:scale-[0.98]
+                               ${item.highlight ? 'border border-orange-500/30 bg-orange-500/5' : ''}`}
                                             title={`${item.title} (Ctrl+Click to open in new tab)`}
                                         >
-                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true" />
-                                            <span className="font-mono text-xs sm:text-sm">{item.title}</span>
+                                            <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform ${item.highlight ? 'text-orange-400' : ''}`} aria-hidden="true" />
+                                            <span className={`font-mono text-xs sm:text-sm ${item.highlight ? 'text-orange-400' : ''}`}>{item.title}</span>
                                             <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
                                         </button>
                                     ))}
@@ -256,7 +259,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                             </div>
                         </div>
 
-                        {/* 🐱 FIX #11: Footer que respeta safe-area */}
                         <div className="flex-shrink-0 p-4 sm:p-6 border-t border-slate-800 bg-slate-950/50">
                             <p className="text-[10px] sm:text-xs text-slate-600 text-center font-mono">
                                 {t.secured}

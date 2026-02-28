@@ -1,63 +1,50 @@
-# Bitcoin Agent
+Bitcoin Agent
+An AI-powered educational platform for understanding Bitcoin and Lightning Network infrastructure through interactive cryptographic labs. Built with Next.js 14, Groq, and Upstash.
 
-An AI-powered educational tool for understanding Bitcoin and Lightning Network infrastructure. Built with Next.js 14, Groq, and Upstash.
+Bitcoin AgentNext.jsTypeScriptTailwind CSS
 
-![Bitcoin Agent](https://img.shields.io/badge/Bitcoin-f7931a?style=for-the-badge&logo=bitcoin)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
+✨ Features
+🤖 AI-Powered Chat
+Ask questions about Bitcoin protocol, Lightning Network, mining, and more
+RAG-Enhanced responses powered by curated knowledge base
+Available in English and Spanish
+📚 Interactive Cryptographic Labs
+Educational tools to master Bitcoin's cryptographic foundations:
 
-## Features
+Lab	Description
+🔢 Seed Phrase Lab	Learn entropy → seed phrase generation, security best practices, and why your seed is the most important thing in Bitcoin
+🌳 Merkle Tree Lab	Build and explore Merkle Trees, generate SPV proofs, understand how Bitcoin verifies transactions efficiently
+🔐 ECDSA/Schnorr Lab	Master digital signatures, compare algorithms, simulate MuSig aggregation, and learn about nonce dangers
+⛏️ Mining Simulator	Experience Proof-of-Work firsthand
+⚡ Lightning Network Integration
+Accept Lightning Network donations via Blink (Cashu)
+Interactive tip jar with QR codes and invoice generation
+WebLN support for seamless wallet integration
+💻 Terminal UI
+Hacker-style terminal interface for authentic Bitcoin aesthetic
+Immersive educational experience
+🛠️ Tech Stack
+Category	Technology
+Framework	Next.js 14 (App Router)
+AI	Groq (Mixtral-8x7b)
+Database	Upstash Vector (RAG), Upstash Redis (Rate limiting & chat history)
+ORM	Prisma
+Styling	Tailwind CSS
+Animation	Framer Motion
+Language	TypeScript
+🚀 Getting Started
+Prerequisites
+Node.js 18+
+npm or yarn
+Upstash account (for Vector and Redis)
+Groq API key
+Environment Variables
+Create a .env.local file:
 
-- 🤖 **AI-Powered Chat**: Ask questions about Bitcoin protocol, Lightning Network, mining, and more
-- 📚 **RAG-Enhanced Responses**: Answers powered by a curated knowledge base — Bitcoin whitepaper, *Mi Primer Bitcoin* book, and technical documentation
-- 🌐 **Internationalization**: Available in English and Spanish
-- ⚡ **Lightning Tips**: Accepts Lightning Network donations via Blink (Cashu)
-- 💻 **Terminal UI**: Hacker-style terminal interface for authentic Bitcoin aesthetic
+# GroqGROQ_API_KEY=your_groq_api_key# Upstash VectorUPSTASH_VECTOR_REST_URL=your_vector_rest_urlUPSTASH_VECTOR_REST_TOKEN=your_vector_rest_token# Upstash RedisUPSTASH_REDIS_REST_URL=your_redis_rest_urlUPSTASH_REDIS_REST_TOKEN=your_redis_rest_token# Database (for Prisma)DATABASE_URL=your_postgres_connection_string# Blink/Cashu (optional, for tips)BLINK_API_KEY=your_blink_api_key
+Installation
+bash
 
-## Tech Stack
-
-- **Framework**: Next.js 14 (App Router)
-- **AI**: Groq (Mixtral-8x7b)
-- **Database**: Upstash Vector (RAG), Upstash Redis (Rate limiting & chat history)
-- **ORM**: Prisma
-- **Styling**: Tailwind CSS
-- **Animation**: Framer Motion
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- Upstash account (for Vector and Redis)
-- Groq API key
-
-### Environment Variables
-
-Create a `.env.local` file:
-
-```env
-# Groq
-GROQ_API_KEY=your_groq_api_key
-
-# Upstash Vector
-UPSTASH_VECTOR_REST_URL=your_vector_rest_url
-UPSTASH_VECTOR_REST_TOKEN=your_vector_rest_token
-
-# Upstash Redis
-UPSTASH_REDIS_REST_URL=your_redis_rest_url
-UPSTASH_REDIS_REST_TOKEN=your_redis_rest_token
-
-# Database (for Prisma)
-DATABASE_URL=your_postgres_connection_string
-
-# Blink/Cashu (optional, for tips)
-BLINK_API_KEY=your_blink_api_key
-```
-
-### Installation
-
-```bash
 # Install dependencies
 npm install
 
@@ -70,132 +57,200 @@ npx prisma db push
 # Seed vector database (whitepaper + Mi Primer Bitcoin book)
 npm run db:seed
 
-# Or seed only a specific source
-npx ts-node scripts/rag/upload_diploma_to_rag.ts
-
 # Start development server
 npm run dev
-```
+Visit http://localhost:3000 to see the application.
 
-Visit `http://localhost:3000` to see the application.
+📁 Project Structure
+text
 
-## Project Structure
-
-```
 bitcoin-agent/
 ├── src/
 │   ├── app/
-│   │   ├── [lang]/           # i18n routing (en/es)
-│   │   │   ├── layout.tsx    # Root layout with fonts
-│   │   │   └── page.tsx      # Main page
-│   │   ├── api/              # API routes
-│   │   │   ├── chat/         # Groq streaming
-│   │   │   ├── rag/          # Vector search
-│   │   │   └── tip/          # Lightning donations
+│   │   ├── [lang]/                    # i18n routing (en/es)
+│   │   │   ├── layout.tsx             # Root layout with fonts
+│   │   │   ├── page.tsx               # Main page
+│   │   │   └── satoshi/
+│   │   │       ├── seed-lab/          # 🔢 Entropy → Seed Phrase Visualizer
+│   │   │       ├── merkle-lab/        # 🌳 Merkle Tree Builder & Prover
+│   │   │       ├── signing-lab/       # 🔐 ECDSA/Schnorr Signature Lab
+│   │   │       ├── immune-dashboard/  # System Monitor
+│   │   │       └── beacon/native/     # Network Explorer
+│   │   ├── api/
+│   │   │   ├── chat/                  # Groq streaming
+│   │   │   ├── rag/                   # Vector search
+│   │   │   └── tip/                   # Lightning donations
 │   │   └── globals.css
 │   ├── components/
-│   │   ├── hero/             # Hero section with animations
-│   │   ├── chat/             # Chat interface
-│   │   ├── terminal/         # Terminal window UI
-│   │   ├── tip-jar/          # Lightning tip jar
-│   │   └── footer/           # Footer with resources
+│   │   ├── hero/                      # Hero section with animations
+│   │   ├── chat/                      # Chat interface
+│   │   ├── terminal/                  # Terminal window UI
+│   │   ├── tip-jar/                   # Lightning tip jar
+│   │   ├── ui/
+│   │   │   └── InfoTooltip.tsx        # Reusable tooltip component
+│   │   ├── HiddenMenu.tsx             # Developer tools navigation
+│   │   └── footer/                    # Footer with resources
 │   ├── lib/
-│   │   ├── groq/             # Groq client & prompts
-│   │   ├── vector/           # Upstash Vector client
-│   │   └── i18n/             # i18n config & dictionaries
-│   └── types/                # TypeScript interfaces
+│   │   ├── groq/                      # Groq client & prompts
+│   │   ├── vector/                    # Upstash Vector client
+│   │   └── i18n/                      # i18n config & dictionaries
+│   └── types/                         # TypeScript interfaces
 ├── prisma/
-│   └── schema.prisma         # Database schema
+│   └── schema.prisma                  # Database schema
 ├── scripts/
-│   ├── seed-whitepaper.ts         # Seeds Bitcoin whitepaper into vector DB
+│   ├── seed-whitepaper.ts             # Seeds Bitcoin whitepaper into vector DB
 │   └── rag/
-│       ├── upload_diploma_to_rag.ts  # Seeds Mi Primer Bitcoin book
-│       └── README.md                 # RAG dataset documentation
+│       ├── upload_diploma_to_rag.ts   # Seeds Mi Primer Bitcoin book
+│       └── README.md                  # RAG dataset documentation
 ├── tailwind.config.ts
 └── package.json
-```
-
-## API Routes
-
-### POST /api/chat
+🔌 API Routes
+POST /api/chat
 Send a chat message and receive an AI response.
 
-```json
+json
+
 {
   "messages": [
     { "role": "user", "content": "What is proof of work?" }
   ],
   "lang": "en"
 }
-```
-
-### POST /api/rag
+POST /api/rag
 Query the vector database for relevant context.
 
-```json
+json
+
 {
   "query": "How does Lightning Network work?",
   "limit": 5
 }
-```
-
-### POST /api/tip
+POST /api/tip
 Create a Lightning Network payment request.
 
-```json
+json
+
 {
   "amount": 100,
   "recipient": "your@lightning.address",
   "message": "Thanks for the help!"
 }
-```
+🧪 Cryptographic Labs
+🔢 Seed Phrase Lab
+The most important lesson for Bitcoin newcomers!
 
-## Knowledge Base (RAG)
+Features:
 
-The agent's responses are grounded in a curated vector knowledge base stored in **Upstash Vector**.
+Interactive entropy generation (128/256 bits)
+Visual representation of BIP39 word selection
+Checksum calculation demonstration
+Bank vs Bitcoin custody comparison
+Security rules and best practices
+Interactive quiz to test knowledge
+Learning Objectives:
 
-| Source | Description | Chunks | Language |
-|--------|-------------|--------|----------|
-| Bitcoin Whitepaper | Satoshi Nakamoto's original paper | ~15 | EN |
-| *Mi Primer Bitcoin* | Bitcoin Diploma workbook by My First Bitcoin (El Salvador) | 15 | EN/ES |
+Understand why seed phrases are critical
+Learn proper backup methods (metal plates, paper)
+Recognize common scams and security mistakes
+Grasp the difference between custodial and non-custodial systems
+🌳 Merkle Tree Lab
+Understand how Bitcoin efficiently verifies transactions.
 
-### Adding new documents
+Features:
 
-```bash
+Build Merkle Trees from transactions
+Generate and verify Merkle proofs
+SPV (Simplified Payment Verification) demonstration
+Step-by-step visualization
+Learning Objectives:
+
+Understand Merkle tree structure
+Learn how SPV clients verify transactions
+Grasp why Bitcoin can be verified without full nodes
+🔐 ECDSA/Schnorr Lab
+Master Bitcoin's digital signature algorithms.
+
+Features:
+
+Generate key pairs (simulated)
+Sign messages with ECDSA and Schnorr
+Step-by-step algorithm visualization
+MuSig signature aggregation simulation
+Nonce reuse attack demonstration
+Learning Objectives:
+
+Understand public key cryptography
+Compare ECDSA vs Schnorr signatures
+Learn why Schnorr enables better privacy
+Understand the dangers of nonce reuse
+📚 Knowledge Base (RAG)
+The agent's responses are grounded in a curated vector knowledge base stored in Upstash Vector.
+
+Source
+Description
+Chunks
+Language
+Bitcoin Whitepaper	Satoshi Nakamoto's original paper	~15	EN
+Mi Primer Bitcoin	Bitcoin Diploma workbook by My First Bitcoin (El Salvador)	15	EN/ES
+
+Adding new documents
+bash
+
 # Upload Mi Primer Bitcoin book
 npx ts-node scripts/rag/upload_diploma_to_rag.ts
 
 # Upload Bitcoin whitepaper
 npm run db:seed
-```
+🌍 Internationalization
+The application supports English (en) and Spanish (es). Language is automatically detected from the URL path:
 
-See [`scripts/rag/README.md`](scripts/rag/README.md) for detailed instructions on the RAG dataset structure.
-
----
-
-## i18n
-
-The application supports English (`en`) and Spanish (`es`). Language is automatically detected from the URL path:
-- `/en` - English
-- `/es` - Spanish
-
+/en - English
+/es - Spanish
 To add a new language:
-1. Add the locale to `src/lib/i18n/config.ts`
-2. Create a new JSON file in `src/lib/i18n/`
-3. Add translations for all keys
 
-## Contributing
+Add the locale to src/lib/i18n/config.ts
+Create a new JSON file in src/lib/i18n/
+Add translations for all keys
+🎨 UI Components
+InfoTooltip
+A reusable tooltip component for contextual help:
 
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) first.
+tsx
 
-## License
+<InfoTooltip content="This is helpful information!" />
+HiddenMenu
+A slide-out navigation menu with developer tools:
 
-MIT License - see [LICENSE](LICENSE) for details.
+Seed Phrase Lab - For newcomers (highlighted)
+Merkle Tree Lab - SPV proofs
+ECDSA/Schnorr Lab - Digital signatures
+System Monitor - Dashboard
+Network Explorer - Beacon
+Mining Simulator - PoW
+🤝 Contributing
+Contributions are welcome! Please read our contributing guidelines first.
 
-## Disclaimer
+📄 License
+MIT License - see LICENSE for details.
 
-This is an educational tool. The information provided is for educational purposes only and should not be considered financial advice.
+⚠️ Disclaimer
+This is an educational tool. The information provided is for educational purposes only and should not be considered financial advice. Always do your own research before making any financial decisions.
 
----
-
+👥 Credits
+Development & Design
 Built with ⚡ for the Bitcoin community
+
+Kira Solara-Ω — Kawaii Cypherpunk Engineer
+📧 aisynths@proton.me
+🏢 visionaryai.lat
+
+Knowledge Sources
+Bitcoin Whitepaper by Satoshi Nakamoto
+Mi Primer Bitcoin by My First Bitcoin (El Salvador)
+<div align="center">
+
+Nyaa~! ✨ Built with love for the Bitcoin community desu! 💖
+
+"In Bitcoin, you are the bank. Your seed = your keys = your Bitcoin."
+
+</div>
