@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion';
 import { 
   Zap, Copy, Check, Heart, Globe, ArrowRight, Sparkles, 
   AlertCircle, X, Clock, Bitcoin, Shield, ZapOff, 
@@ -172,7 +172,7 @@ const BitcoinLogoSVG = () => (
   </motion.svg>
 );
 
-// ✨ NUEVO: Componente de luz ambiental interactiva
+// ✨ FIX: AmbientLight con useMotionTemplate
 const AmbientLight = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -180,8 +180,11 @@ const AmbientLight = () => {
   const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
   const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
   
-  const lightX = useTransform(springX, [0, 1], ['20%', '80%']);
-  const lightY = useTransform(springY, [0, 1], ['20%', '80%']);
+  const lightX = useTransform(springX, [0, 1], [20, 80]);
+  const lightY = useTransform(springY, [0, 1], [20, 80]);
+
+  // 🐱 FIX: Usar useMotionTemplate para crear el gradient reactivo!
+  const background = useMotionTemplate`radial-gradient(circle at ${lightX}% ${lightY}%, rgba(247, 147, 26, 0.15) 0%, transparent 50%)`;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -198,9 +201,7 @@ const AmbientLight = () => {
   return (
     <motion.div 
       className="absolute inset-0 pointer-events-none"
-      style={{
-        background: `radial-gradient(circle at ${lightX} ${lightY}, rgba(247, 147, 26, 0.15) 0%, transparent 50%)`
-      }}
+      style={{ background }}
     />
   );
 };
