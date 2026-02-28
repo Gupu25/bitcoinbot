@@ -1,4 +1,4 @@
-'use client';
+F'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,14 +41,14 @@ interface TipJarProps {
 const defaultDictByLocale: Record<Locale, TipDict['tip']> = {
   en: {
     title: 'Power the Mission',
-    description: 'Your sats help us embed this Bitcoin Agent in communities worldwide—starting with A.i and beyond.',
+    description: 'Your sats fund the Bitcoin Agent infrastructure—servers, APIs, and continuous improvements.',
     button: 'Send Sats',
     success: 'Zap received! ⚡',
     error: 'Payment failed. Please try again.',
     impact: 'Impact so far',
-    embeds: 'Community embeds',
+    embeds: 'Community contributors',
     satsRaised: 'Sats raised',
-    nextTarget: 'Next: Global adoption',
+    nextTarget: 'Next: Enhanced AI models',
     thankYou: 'Thank you for keeping the orange flame alive!',
     copy: 'Copy LN address',
     scan: 'Scan with wallet',
@@ -63,14 +63,14 @@ const defaultDictByLocale: Record<Locale, TipDict['tip']> = {
   },
   es: {
     title: 'Impulsa la Misión',
-    description: 'Tus sats nos ayudan a integrar este Bitcoin Agent en comunidades del mundo—empezando por Bitcoin Beach y más allá.',
+    description: 'Tus sats mantienen vivo el Bitcoin Agent—servidores, APIs y mejoras continuas.',
     button: 'Enviar Sats',
     success: '¡Zap recibido! ⚡',
     error: 'El pago falló. Por favor intenta de nuevo.',
     impact: 'Impacto hasta ahora',
-    embeds: 'Comunidades con embed',
+    embeds: 'Contribuyentes activos',
     satsRaised: 'Sats recaudados',
-    nextTarget: 'Próximo: Sitio de Bitcoin Beach',
+    nextTarget: 'Próximo: Modelos de IA mejorados',
     thankYou: '¡Gracias por mantener viva la llama naranja!',
     copy: 'Copiar dirección LN',
     scan: 'Escanear con wallet',
