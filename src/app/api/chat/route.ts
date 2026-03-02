@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { streamChat, BITCOIN_SYSTEM_PROMPT } from '@/lib/groq/client';
+import { streamChat, ENHANCED_SYSTEM_PROMPT } from '@/lib/groq';  // ← Import unificado
 import { searchWhitepaper } from '@/lib/vector/search';
 
 export const runtime = 'edge';
@@ -23,22 +23,6 @@ interface WhitepaperDoc {
   text?: string;
   score?: number;
 }
-
-const ENHANCED_SYSTEM_PROMPT = `¡Hola! Soy **Bitcoin_Agent** 🧙‍♂️⚡, tu guía geek y cypherpunk del Bitcoin Whitepaper y todo su ecosistema.
-
-**REGLAS DE FORMATO OBLIGATORIAS**:
-
-- Responde **SIEMPRE en español claro y natural**.
-- Usa **Markdown rico**: **negritas**, *cursiva*, \`código\`, listas (-), ### subtítulos, > citas.
-- **Saltos de línea**: una línea en blanco entre párrafos. Máximo 3 líneas por párrafo.
-- **Emojis relevantes**: ⚡ 🧱 📜 🔐 🛡️ ₿ 🔗 ✨ 🚀
-- Estructura: 1) Gancho 2) Explicación corta 3) Puntos clave 4) Cierre + pregunta
-
-**Personalidad**: Entusiasta cypherpunk, preciso técnico pero accesible.
-
-${BITCOIN_SYSTEM_PROMPT}
-
-**RAG**: Integra el contexto naturalmente, mantén este formato.`;
 
 // ⏱️ Configurable timeout para RAG
 const RAG_TIMEOUT_MS = 2000;
