@@ -44,14 +44,33 @@
   },
   "partners": {
     "title": "Comprar Bitcoin en México",
-    "subtitle": "Plataformas confiables para empezar",
+    "subtitle": "Tu ruta segura hacia la libertad financiera",
+    "intro": "Bitcoin es dinero digital que tú controlas. En México puedes comprarlo usando tu banco (SPEI) o tarjeta.",
     "sponsor": {
       "name": "Aureo",
-      "description": "Exchange mexicano con soporte en español y pesos MXN",
-      "cta": "Ir a Aureo →",
-      "badge": "Sponsor Oficial Hackatón"
+      "tagline": "Bitcoin rápido como el rayo para mexicanos",
+      "description": "Aureo es la plataforma mexicana que hace fácil tu primer paso en Bitcoin. Compra con SPEI en segundos, retira vía Lightning Network, y aprende mientras construyes tu futuro financiero. Hecho con amor en México, para mexicanos. \ud83d\udc9b",
+      "features": [
+        "\ud83c\uddf2\ud83c\uddfd 100% México",
+        "\u26a1 Lightning Native",
+        "\ud83d\udd50 SPEI 24/7",
+        "\ud83d\udcb0 Comisiones justas"
+      ],
+      "cta": "Ir a Aureo \u2192",
+      "badge": "Sponsor Oficial Hackatón",
+      "trust": [
+        "Soporte en español",
+        "Interfaz intuitiva",
+        "Seguridad primero",
+        "Comunidad activa"
+      ]
     },
-    "disclaimer": "Bitcoin Agent no es un exchange. Verifica siempre antes de operar."
+    "footer": "\ud83d\udc9b Aureo apoya la educación Bitcoin en México \u2022 Gracias por confiar en ellos",
+    "newPointer": "¿Es tu primera vez? Pregunta en el chat: '¿Cómo compro mi primer Bitcoin?' \ud83e\udd16\u2728",
+    "glossary": {
+      "spei": "Transferencia bancaria en México, disponible 24/7.",
+      "lightning": "Pagos instantáneos con Bitcoin, ideal para cantidades pequeñas."
+    }
   },
   "markets": {
     "title": "Métricas de Red",
@@ -112,24 +131,15 @@
     }
   },
   "footer": {
+    "missionText": "Aprende Bitcoin jugando con él. Plataforma educativa interactiva con tutor AI, laboratorios prácticos y Lightning Network real. Sin registro. Sin tracking. Solo educación Bitcoin pura.",
     "resources": "Lectura Esencial",
-    "documentation": "Docs para Desarrolladores",
-    "system": "Sistema",
-    "dashboard": "Panel Inmune",
-    "beacon": "Beacon Nativo",
-    "challenge": "Zona de Desafíos",
-    "about": "Nosotros",
+    "documentation": "Documentación",
     "protocol": "Whitepaper de Bitcoin",
-    "lightning": "Paper de Lightning",
-    "books": "Guía de Seguridad",
-    "disclaimer": "Este es software educativo. No es asesoramiento financiero.",
-    "copyright": "© 2024 Bitcoin Agent. Código abierto bajo licencia MIT.",
-    "builtBy": "Construido por",
-    "contact": "Contacto",
-    "mission": "Misión",
-    "missionText": "Democratizando la educación Bitcoin mediante IA, una comunidad a la vez.",
-    "privacy": "Privacidad",
-    "terms": "Términos"
+    "lightning": "Lightning Network Paper",
+    "books": "Securing Bitcoin",
+    "copyright": "© 2026 Bitcoin Agent",
+    "disclaimer": "Software educativo. No es asesoría financiera.",
+    "builtBy": "Construido por"
   },
   "errors": {
     "generic": "Ocurrió un error. Por favor intenta de nuevo.",

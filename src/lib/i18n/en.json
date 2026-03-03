@@ -44,14 +44,33 @@
   },
   "partners": {
     "title": "Buy Bitcoin in Mexico",
-    "subtitle": "Trusted platforms to get started",
+    "subtitle": "Your safe path to financial freedom",
+    "intro": "Bitcoin is digital money you control. In Mexico, you can buy it using your bank (SPEI) or card.",
     "sponsor": {
       "name": "Aureo",
-      "description": "Mexican exchange with Spanish support and MXN pesos",
-      "cta": "Go to Aureo →",
-      "badge": "Official Hackathon Sponsor"
+      "tagline": "Lightning-fast Bitcoin for Mexicans",
+      "description": "Aureo is the Mexican platform that makes your first step into Bitcoin easy. Buy with SPEI in seconds, withdraw via Lightning Network, and learn while building your financial future. Made with love in Mexico, for Mexicans. \ud83d\udc9b",
+      "features": [
+        "\ud83c\uddf2\ud83c\uddfd 100% Mexico",
+        "\u26a1 Lightning Native",
+        "\ud83d\udd50 SPEI 24/7",
+        "\ud83d\udcb0 Fair fees"
+      ],
+      "cta": "Go to Aureo \u2192",
+      "badge": "Official Hackathon Sponsor",
+      "trust": [
+        "Spanish support",
+        "Intuitive interface",
+        "Security first",
+        "Active community"
+      ]
     },
-    "disclaimer": "Bitcoin Agent is not an exchange. Always verify before trading."
+    "footer": "\ud83d\udc9b Aureo supports Bitcoin education in Mexico \u2022 Thanks for trusting them",
+    "newPointer": "Is it your first time? Ask in the chat: 'How do I buy my first Bitcoin?' \ud83e\udd16\u2728",
+    "glossary": {
+      "spei": "Bank transfer in Mexico, available 24/7.",
+      "lightning": "Instant Bitcoin payments, ideal for small amounts."
+    }
   },
   "markets": {
     "title": "Network Metrics",
@@ -112,23 +131,14 @@
     }
   },
   "footer": {
+    "missionText": "Learn Bitcoin by playing with it. Interactive educational platform with AI tutor, practical labs, and real Lightning Network. No sign-ups. No tracking. Just pure Bitcoin education.",
     "resources": "Essential Reading",
-    "documentation": "Developer Docs",
+    "documentation": "Documentation",
     "protocol": "Bitcoin Whitepaper",
-    "lightning": "Lightning Paper",
-    "books": "Security Guide",
-    "disclaimer": "This is educational software. Not financial advice.",
-    "copyright": "© 2024 Bitcoin Agent. Open source under MIT license.",
-    "builtBy": "Built by",
-    "contact": "Contact",
-    "mission": "Mission",
-    "missionText": "Democratizing Bitcoin education through AI, one community at a time.",
-    "system": "System",
-    "dashboard": "Immune Dashboard",
-    "beacon": "Native Beacon",
-    "challenge": "Challenge Zone",
-    "about": "About Us",
-    "privacy": "Privacy",
-    "terms": "Terms"
+    "lightning": "Lightning Network Paper",
+    "books": "Securing Bitcoin",
+    "copyright": "© 2026 Bitcoin Agent",
+    "disclaimer": "Educational software. Not financial advice.",
+    "builtBy": "Built by"
   }
 }
