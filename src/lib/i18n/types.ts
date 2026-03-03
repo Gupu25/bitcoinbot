@@ -30,6 +30,8 @@ type MarketsTranslation = {
 // Tipo principal
 export type TranslationKeys = typeof en & {
   markets: MarketsTranslation;
+  whyMexico?: any;
+  partners?: any;
 };
 
 export type Locale = 'en' | 'es';

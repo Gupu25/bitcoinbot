@@ -31,6 +31,28 @@
       "hint": "Escribe tu pregunta sobre Bitcoin..."
     }
   },
+  "whyMexico": {
+    "title": "¿Por qué Bitcoin en México?",
+    "subtitle": "Libertad financiera sin fronteras",
+    "points": [
+      "🛡️ Protege tus ahorros de la inflación",
+      "⚡ Envía dinero a cualquier lugar en minutos",
+      "🌍 Sin permiso de bancos ni gobiernos",
+      "🇲🇽 Hecho para mexicanos, por mexicanos"
+    ],
+    "cta": "Aprende más"
+  },
+  "partners": {
+    "title": "Comprar Bitcoin en México",
+    "subtitle": "Plataformas confiables para empezar",
+    "sponsor": {
+      "name": "Aureo",
+      "description": "Exchange mexicano con soporte en español y pesos MXN",
+      "cta": "Ir a Aureo →",
+      "badge": "Sponsor Oficial Hackatón"
+    },
+    "disclaimer": "Bitcoin Agent no es un exchange. Verifica siempre antes de operar."
+  },
   "markets": {
     "title": "Métricas de Red",
     "subtitle": "Los datos de mercado son secundarios a la utilidad de la red",
