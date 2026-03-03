@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Info, Shield, Zap, Terminal, TreeDeciduous, Key, Fingerprint, ExternalLink } from 'lucide-react';
+import { 
+  Menu, X, Info, Shield, Zap, Terminal, TreeDeciduous, Key, 
+  Fingerprint, ExternalLink, FileText, Scale
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -14,12 +17,14 @@ const translations = {
     en: {
         about: 'About Us',
         adminZone: 'Developer Tools',
+        complianceZone: 'Admin',
         immuneDashboard: 'System Monitor',
         nativeBeacon: 'Network Explorer',
         seedLab: 'Seed Phrase Lab',
         merkleLab: 'Merkle Tree Lab',
         signingLab: 'ECDSA/Schnorr Lab',
         challengeZone: 'Mining Simulator',
+        compliance: 'Compliance Dashboard',
         secured: '🔐 Secured Connection',
         version: 'v2.0.1 • Secure Mode',
         close: 'Close menu',
@@ -28,12 +33,14 @@ const translations = {
     es: {
         about: 'Sobre Nosotros',
         adminZone: 'Herramientas Dev',
+        complianceZone: 'Admin',
         immuneDashboard: 'Monitor del Sistema',
         nativeBeacon: 'Explorador de Red',
         seedLab: 'Lab Frase Semilla',
         merkleLab: 'Lab Árboles Merkle',
         signingLab: 'Lab ECDSA/Schnorr',
         challengeZone: 'Simulador de Minería',
+        compliance: 'Panel Compliance',
         secured: '🔐 Conexión Segura',
         version: 'v2.0.1 • Modo Seguro',
         close: 'Cerrar menú',
@@ -92,18 +99,28 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
 
     const handleAdminClick = (path: string) => {
         setIsOpen(false);
-        // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
-        const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
-        const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+        // Routes that need lang prefix
+        const langPrefixPaths = [
+            '/satoshi/seed-lab', 
+            '/satoshi/merkle-lab', 
+            '/satoshi/signing-lab',
+            '/admin/compliance'
+        ];
+        const fullPath = langPrefixPaths.includes(path) ? `/${lang}${path}` : path;
         setTimeout(() => router.push(fullPath), 150);
     };
 
     const handleAdminAuxClick = (e: React.MouseEvent, path: string) => {
         if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
-            const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
-            const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+            // Routes that need lang prefix
+            const langPrefixPaths = [
+                '/satoshi/seed-lab', 
+                '/satoshi/merkle-lab', 
+                '/satoshi/signing-lab',
+                '/admin/compliance'
+            ];
+            const fullPath = langPrefixPaths.includes(path) ? `/${lang}${path}` : path;
             window.open(fullPath, '_blank');
             setIsOpen(false);
         }
@@ -122,13 +139,23 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
         ? { duration: 0 }
         : { type: 'spring', damping: 25, stiffness: 200 };
 
-    const menuItems = [
+    // Educational Labs (public, highlighted)
+    const labItems = [
         { title: t.seedLab, path: '/satoshi/seed-lab', icon: Fingerprint, highlight: true },
         { title: t.merkleLab, path: '/satoshi/merkle-lab', icon: TreeDeciduous },
         { title: t.signingLab, path: '/satoshi/signing-lab', icon: Key },
+    ];
+
+    // Developer Tools
+    const devItems = [
         { title: t.immuneDashboard, path: '/satoshi/immune-dashboard', icon: Shield },
         { title: t.nativeBeacon, path: '/satoshi/beacon/native', icon: Zap },
         { title: t.challengeZone, path: '/challenge/pow', icon: Terminal },
+    ];
+
+    // Admin (restricted)
+    const adminItems = [
+        { title: t.compliance, path: '/admin/compliance', icon: Scale, admin: true },
     ];
 
     return (
@@ -220,6 +247,7 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                            {/* Public Link */}
                             <div className="mb-6 sm:mb-8">
                                 <Link
                                     href={`/${lang}/about`}
@@ -233,25 +261,74 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
                                 </Link>
                             </div>
 
-                            <div>
+                            {/* Educational Labs */}
+                            <div className="mb-6">
                                 <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
-                                    {t.adminZone}
+                                    {lang === 'en' ? 'Learn Bitcoin' : 'Aprende Bitcoin'}
                                 </p>
-                                <nav className="space-y-1" aria-label="Admin navigation">
-                                    {menuItems.map((item) => (
+                                <nav className="space-y-1">
+                                    {labItems.map((item) => (
                                         <button
                                             key={item.title}
                                             onClick={(e) => handleAdminClick(item.path)}
                                             onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
                                             className={`w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
                                text-slate-400 hover:text-[#f7931a] hover:bg-slate-900 
-                               transition-colors text-left group
-                               active:scale-[0.98]
+                               transition-colors text-left group active:scale-[0.98]
                                ${item.highlight ? 'border border-orange-500/30 bg-orange-500/5' : ''}`}
                                             title={`${item.title} (Ctrl+Click to open in new tab)`}
                                         >
                                             <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform ${item.highlight ? 'text-orange-400' : ''}`} aria-hidden="true" />
                                             <span className={`font-mono text-xs sm:text-sm ${item.highlight ? 'text-orange-400' : ''}`}>{item.title}</span>
+                                            <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+
+                            {/* Developer Tools */}
+                            <div className="mb-6">
+                                <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
+                                    {t.adminZone}
+                                </p>
+                                <nav className="space-y-1">
+                                    {devItems.map((item) => (
+                                        <button
+                                            key={item.title}
+                                            onClick={(e) => handleAdminClick(item.path)}
+                                            onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                               text-slate-400 hover:text-[#f7931a] hover:bg-slate-900 
+                               transition-colors text-left group active:scale-[0.98]"
+                                            title={`${item.title} (Ctrl+Click to open in new tab)`}
+                                        >
+                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                                            <span className="font-mono text-xs sm:text-sm">{item.title}</span>
+                                            <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+
+                            {/* Admin Section */}
+                            <div>
+                                <p className="text-[10px] sm:text-xs text-red-500/80 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
+                                    {t.complianceZone}
+                                </p>
+                                <nav className="space-y-1">
+                                    {adminItems.map((item) => (
+                                        <button
+                                            key={item.title}
+                                            onClick={(e) => handleAdminClick(item.path)}
+                                            onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                               text-slate-400 hover:text-red-400 hover:bg-slate-900 
+                               transition-colors text-left group active:scale-[0.98]
+                               border border-red-500/20"
+                                            title={`${item.title} (Ctrl+Click to open in new tab)`}
+                                        >
+                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform text-red-400/70" aria-hidden="true" />
+                                            <span className="font-mono text-xs sm:text-sm">{item.title}</span>
                                             <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
                                         </button>
                                     ))}

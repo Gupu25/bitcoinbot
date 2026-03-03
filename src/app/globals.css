@@ -2,237 +2,374 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   🦊💎 BOB × BITCOIN VAULT - Neon Kawaii Cypherpunk Theme
+   "Educational, functional, and absolutely adorable~!"
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  --bitcoin-orange: 249 115 22;
-  --bitcoin-amber: 251 191 36;
-  /* Removed slate overrides to prevent Tailwind conflict */
+  /* 🧡 Bitcoin Orange - Primary */
+  --btc-orange: #F7931A;
+  --btc-orange-light: #FFB347;
+  --btc-orange-dark: #E67E00;
+  --btc-orange-glow: rgba(247, 147, 26, 0.6);
+  
+  /* 💜 Cyber Purple - Secondary */
+  --cyber-purple: #A855F7;
+  --cyber-purple-light: #C084FC;
+  --cyber-purple-dark: #7C3AED;
+  --cyber-purple-glow: rgba(168, 85, 247, 0.5);
+  
+  /* 💖 Kawaii Pink - Accent */
+  --kawaii-pink: #FF6B9D;
+  --kawaii-pink-light: #FFB3D9;
+  --kawaii-pink-dark: #E91E63;
+  --kawaii-pink-glow: rgba(255, 107, 157, 0.5);
+  
+  /* 🩵 Neon Cyan - Tertiary */
+  --neon-cyan: #00F5FF;
+  --neon-cyan-light: #67E8F9;
+  --neon-cyan-dark: #06B6D4;
+  --neon-cyan-glow: rgba(0, 245, 255, 0.5);
+  
+  /* 💚 Matrix Green - Code & Success */
+  --matrix-green: #00FF41;
+  --matrix-green-light: #4ADE80;
+  --matrix-green-dark: #22C55E;
+  --matrix-green-glow: rgba(0, 255, 65, 0.5);
+  
+  /* 🌙 Dark Theme Base */
+  --void-black: #030308;
+  --deep-space: #0A0A0F;
+  --cosmic-gray: #1A1A2E;
+  --stellar-gray: #16213E;
+  --nebula-gray: #252540;
+  
+  /* 🌟 Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #E2E8F0;
+  --text-muted: #94A3B8;
+  --text-faint: #64748B;
+  
+  /* ✨ Effects */
+  --glow-intensity: 0.8;
+  --blur-amount: 10px;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
-    /* 🐱 FIX #1: Prevenir zoom accidental en inputs en iOS */
     -webkit-text-size-adjust: 100%;
-    /* 🐱 FIX #2: Smooth scrolling con momentum en iOS */
     -webkit-overflow-scrolling: touch;
   }
 
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-    /* 🐱 FIX #3: Font features con fallback seguro */
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    /* 🐱 FIX #4: Mejor renderizado de fuentes en móviles */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--void-black);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* 🐱 FIX #5: Prevenir selección accidental en elementos táctiles */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     user-select: none;
     -webkit-user-select: none;
   }
 
-  /* 🐱 FIX #6: Permitir selección en texto legítimo */
-  p,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  span,
-  div {
+  /* 🌟 Cosmic Background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, var(--btc-orange-glow) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, var(--cyber-purple-glow) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 30% at 20% 80%, var(--kawaii-pink-glow) 0%, transparent 40%);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: -2;
+    animation: cosmicPulse 8s ease-in-out infinite alternate;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(247, 147, 26, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(247, 147, 26, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: -1;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  /* Selection kawaii */
+  ::selection {
+    background: rgba(255, 107, 157, 0.3);
+    color: white;
+    text-shadow: 0 0 10px var(--kawaii-pink);
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 4rem);
+    background: linear-gradient(135deg, var(--btc-orange), var(--kawaii-pink), var(--cyber-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite alternate;
+  }
+
+  p, span, div {
     user-select: text;
     -webkit-user-select: text;
   }
 
-  /* Selection naranja cypherpunk */
-  ::selection {
-    @apply bg-orange-500/30 text-orange-100;
-  }
-
-  /* 🐱 FIX #7: Estilos base para inputs en móvil */
-  input,
-  textarea,
-  button {
-    @apply text-base;
-    /* Prevenir zoom en iOS al focus */
+  input, textarea, button {
     font-size: 16px;
-  }
-
-  /* 🐱 FIX #8: Touch targets mínimos accesibles (44x44px) */
-  button,
-  a,
-  [role="button"] {
-    @apply min-h-[44px] min-w-[44px];
+    -webkit-tap-highlight-color: rgba(247, 147, 26, 0.1);
   }
 }
 
 @layer components {
-
-  /* Glassmorphism card base - OPTIMIZADO PARA MÓVIL */
+  /* 🎀 Glass Card - Kawaii Edition */
   .glass-card {
-    @apply bg-slate-900 border border-slate-700 rounded-2xl sm:rounded-3xl;
-    /* 🐱 FIX #9: Sombra más ligera en móvil para performance */
-    @apply sm:shadow-lg;
+    @apply relative bg-[var(--cosmic-gray)]/60 backdrop-blur-md;
+    @apply border border-[var(--btc-orange)]/20 rounded-2xl sm:rounded-3xl;
+    @apply p-4 sm:p-6;
+    @apply transition-all duration-300;
+    @apply overflow-hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(135deg, transparent 40%, rgba(247, 147, 26, 0.05) 50%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
   }
 
   .glass-card:hover {
-    @apply border-orange-500/40;
-    /* Sombra solo en desktop, reduce lag en móvil */
-    @apply sm:shadow-2xl sm:shadow-orange-500/20;
-  }
-
-  /* 🐱 FIX #10: Botón Bitcoin RESPONSIVE */
-  .btn-bitcoin {
-    @apply relative px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5;
-    @apply bg-gradient-to-r from-orange-500 to-amber-500;
-    @apply hover:from-orange-400 hover:to-amber-400;
-    @apply active:from-orange-600 active:to-amber-600;
-    @apply text-slate-950 font-bold;
-    @apply text-base sm:text-lg lg:text-xl;
-    @apply rounded-xl sm:rounded-2xl;
-    @apply transition-all;
-    @apply shadow-lg shadow-orange-500/30;
-    @apply sm:shadow-2xl sm:shadow-orange-500/40;
-    @apply hover:shadow-orange-500/50;
-    @apply overflow-hidden;
-    /* 🐱 FIX #11: Escala táctil para feedback inmediato */
-    @apply active:scale-[0.98] sm:hover:scale-[1.02] sm:active:scale-[0.98];
-    /* 🐱 FIX #12: Touch action optimizado */
-    touch-action: manipulation;
-  }
-
-  /* Shine effect para botones - desactivado en móvil por performance */
-  .btn-shine::after {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full;
-    @apply transition-transform duration-700;
-    /* 🐱 FIX #13: Solo mostrar shine en desktop */
-    @apply hidden sm:block;
-  }
-
-  .btn-shine:hover::after {
-    @apply translate-x-full;
-  }
-
-  /* Texto gradiente Bitcoin */
-  .text-gradient-bitcoin {
-    @apply bg-gradient-to-br from-orange-300 via-amber-300 to-white bg-clip-text text-transparent;
-  }
-
-  /* 🐱 FIX #14: Badge premium RESPONSIVE */
-  .badge-premium {
-    @apply px-4 py-2 sm:px-6 sm:py-3 lg:px-8 lg:py-3;
-    @apply bg-slate-900 border border-orange-500/40;
-    @apply rounded-xl sm:rounded-2xl;
-    @apply text-orange-400 text-xs sm:text-sm font-mono;
-    @apply tracking-[2px] sm:tracking-[3px] lg:tracking-[4px];
-    @apply uppercase flex items-center justify-center gap-2 sm:gap-3;
-    @apply shadow-lg shadow-orange-500/10;
+    @apply border-[var(--btc-orange)]/40;
     @apply sm:shadow-2xl;
-    @apply hover:border-orange-500/60;
-    @apply transition-all duration-300;
-    /* 🐱 FIX #15: Escala táctil consistente */
-    @apply active:scale-95 sm:hover:scale-105;
-    touch-action: manipulation;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--btc-orange-glow);
+    transform: translateY(-4px);
   }
 
-  /* 🐱 FIX #16: Stats card RESPONSIVE */
+  .glass-card:hover::before {
+    opacity: 1;
+  }
+
+  /* 🧡 Bitcoin Button - Neon Glow */
+  .btn-bitcoin {
+    @apply relative px-6 py-3 sm:px-8 sm:py-4;
+    @apply font-bold font-mono uppercase tracking-wider text-sm sm:text-base;
+    @apply rounded-xl sm:rounded-2xl;
+    @apply overflow-hidden transition-all duration-300;
+    @apply active:scale-[0.98] sm:hover:scale-[1.02];
+    touch-action: manipulation;
+    
+    background: linear-gradient(135deg, var(--btc-orange), var(--btc-orange-light));
+    color: var(--void-black);
+    box-shadow: 
+      0 0 20px var(--btc-orange-glow),
+      0 4px 15px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-bitcoin::before {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.4) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .btn-bitcoin:hover::before {
+    transform: translateX(100%);
+  }
+
+  .btn-bitcoin:hover {
+    box-shadow: 
+      0 0 40px var(--btc-orange-glow),
+      0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 💜 Cyber Button */
+  .btn-cyber {
+    @apply relative px-6 py-3 sm:px-8 sm:py-4;
+    @apply font-bold font-mono uppercase tracking-wider text-sm;
+    @apply rounded-xl sm:rounded-2xl;
+    @apply bg-transparent border-2 border-[var(--neon-cyan)];
+    @apply text-[var(--neon-cyan)];
+    @apply transition-all duration-300;
+    @apply active:scale-[0.98] sm:hover:scale-[1.02];
+    touch-action: manipulation;
+    box-shadow: 
+      0 0 15px var(--neon-cyan-glow),
+      inset 0 0 15px rgba(0, 245, 255, 0.1);
+  }
+
+  .btn-cyber:hover {
+    background: rgba(0, 245, 255, 0.1);
+    box-shadow: 
+      0 0 30px var(--neon-cyan-glow),
+      inset 0 0 30px rgba(0, 245, 255, 0.2);
+  }
+
+  /* 💖 Kawaii Button */
+  .btn-kawaii {
+    @apply relative px-6 py-3;
+    @apply font-bold text-sm uppercase tracking-wider;
+    @apply rounded-xl;
+    @apply transition-all duration-300;
+    @apply active:scale-[0.98] sm:hover:scale-[1.02];
+    touch-action: manipulation;
+    
+    background: linear-gradient(135deg, var(--kawaii-pink), var(--kawaii-pink-light));
+    color: var(--void-black);
+    box-shadow: 0 0 20px var(--kawaii-pink-glow);
+  }
+
+  .btn-kawaii:hover {
+    box-shadow: 0 0 40px var(--kawaii-pink-glow);
+  }
+
+  /* 🎴 Badge Premium */
+  .badge-premium {
+    @apply inline-flex items-center gap-2 px-4 py-2;
+    @apply bg-[var(--cosmic-gray)] border border-[var(--btc-orange)]/40;
+    @apply rounded-full text-xs font-mono uppercase tracking-widest;
+    @apply text-[var(--btc-orange)];
+    box-shadow: 0 0 15px var(--btc-orange-glow);
+  }
+
+  /* 📊 Stat Card */
   .stat-card {
-    @apply bg-slate-900 border border-slate-700;
-    @apply rounded-2xl sm:rounded-3xl;
-    @apply p-4 sm:p-6;
-    @apply text-center;
+    @apply bg-[var(--cosmic-gray)]/40 border border-[var(--cyber-purple)]/20;
+    @apply rounded-2xl p-4 sm:p-6 text-center;
     @apply transition-all duration-300;
     @apply active:scale-[0.98] sm:hover:-translate-y-1;
     touch-action: manipulation;
   }
 
-  /* 🐱 FIX #17: NUEVO - Card táctil para listados */
-  .touch-card {
-    @apply relative overflow-hidden;
-    @apply bg-slate-900/60 border border-slate-800;
-    @apply rounded-xl sm:rounded-2xl;
-    @apply p-4 sm:p-6;
-    @apply transition-all duration-200;
-    @apply active:bg-slate-800 active:border-orange-500/30;
-    @apply sm:hover:bg-slate-800 sm:hover:border-orange-500/30;
-    touch-action: manipulation;
+  .stat-card:hover {
+    border-color: rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 25px var(--cyber-purple-glow);
   }
 
-  /* 🐱 FIX #18: NUEVO - Input cypherpunk optimizado */
+  /* 🖥️ Terminal/Cypher Input */
   .input-cypher {
-    @apply w-full bg-slate-900/50 border border-slate-700;
+    @apply w-full bg-[var(--deep-space)]/80 border border-[var(--btc-orange)]/20;
     @apply rounded-xl px-4 py-3;
     @apply text-white font-mono text-base;
-    @apply placeholder:text-slate-600;
-    @apply focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20;
-    @apply transition-all;
-    /* 🐱 FIX #19: Prevenir zoom en iOS */
+    @apply placeholder:text-[var(--text-faint)];
+    @apply focus:outline-none focus:border-[var(--btc-orange)]/50;
+    @apply transition-all duration-300;
     font-size: 16px;
-    /* 🐱 FIX #20: Mejor tap highlight en móvil */
-    -webkit-tap-highlight-color: rgba(249, 115, 22, 0.1);
   }
 
-  /* 🐱 FIX #21: NUEVO - Container responsive consistente */
-  .container-cypher {
-    @apply w-full max-w-7xl mx-auto;
-    @apply px-4 sm:px-6 lg:px-8;
+  .input-cypher:focus {
+    box-shadow: 
+      0 0 20px var(--btc-orange-glow),
+      inset 0 0 10px rgba(247, 147, 26, 0.1);
+  }
+
+  /* 🎀 Kawaii Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--deep-space);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--btc-orange), var(--kawaii-pink));
+    border-radius: 10px;
+    border: 2px solid var(--deep-space);
+    box-shadow: 0 0 10px var(--btc-orange-glow);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--btc-orange-light), var(--kawaii-pink-light));
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--btc-orange) var(--deep-space);
   }
 }
 
 @layer utilities {
-
-  /* Animación suave para elementos interactivos */
-  .interactive {
-    @apply transition-all duration-300 ease-out;
-    @apply active:scale-[0.98];
-    touch-action: manipulation;
-  }
-
-  /* 🐱 FIX #22: Glow naranja RESPONSIVE */
+  /* ✨ Glow Effects */
   .glow-orange {
-    /* Sin glow en móvil (ahorro de batería), glow sutil en desktop */
-    @apply sm:shadow-[0_0_20px_-5px_rgba(249, 115, 22, 0.2)];
+    box-shadow: 0 0 20px var(--btc-orange-glow);
   }
 
-  /* 🐱 FIX #23: Glow intenso solo en desktop */
-  .glow-orange-strong {
-    @apply sm:shadow-[0_0_30px_-5px_rgba(249, 115, 22, 0.3)];
+  .glow-purple {
+    box-shadow: 0 0 20px var(--cyber-purple-glow);
   }
 
-  /* Text shadow para legibilidad */
-  .text-shadow {
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  .glow-pink {
+    box-shadow: 0 0 20px var(--kawaii-pink-glow);
   }
 
-  /* 🐱 FIX #24: NUEVO - Safe area para notches */
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
+  .glow-cyan {
+    box-shadow: 0 0 20px var(--neon-cyan-glow);
   }
 
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+  .text-glow-orange {
+    text-shadow: 0 0 20px var(--btc-orange-glow);
   }
 
-  /* 🐱 FIX #25: NUEVO - Ocultar scrollbar pero mantener funcionalidad */
+  /* 🌈 Gradient Text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--btc-orange), var(--kawaii-pink), var(--cyber-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 🎭 Animations */
+  @keyframes cosmicPulse {
+    0% { opacity: 0.2; transform: scale(1); }
+    100% { opacity: 0.35; transform: scale(1.05); }
+  }
+
+  @keyframes titleGlow {
+    0% { filter: brightness(1) drop-shadow(0 0 20px var(--btc-orange-glow)); }
+    100% { filter: brightness(1.1) drop-shadow(0 0 40px var(--kawaii-pink-glow)); }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* 📱 Safe Areas */
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+  /* 🙈 Scrollbar Hide */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 🐱 FIX #26: NUEVO - Prevenir layout shift */
-  .aspect-cypher {
-    aspect-ratio: 16 / 10;
-  }
-
-  /* 🐱 FIX #27: NUEVO - Truncamiento elegante */
-  .line-clamp-cypher {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 }
