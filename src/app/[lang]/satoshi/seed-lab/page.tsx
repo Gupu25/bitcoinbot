@@ -66,6 +66,11 @@ const getWord = (index: number): string => {
 interface Translations {
   title: string;
   subtitle: string;
+  introTitle: string;
+  introText: string;
+  glossarySeedPhrase: string;
+  glossaryEntropy: string;
+  glossaryChecksum: string;
   generateEntropy: string;
   entropyBits: string;
   entropyDesc: string;
@@ -136,12 +141,17 @@ const translations: Record<'en' | 'es', Translations> = {
   en: {
     title: 'Seed Phrase Lab',
     subtitle: 'Understand the most important 12-24 words of your Bitcoin journey',
+    introTitle: 'Why does this matter?',
+    introText: 'In Bitcoin, you control your money. There is no bank to recover your password. Twelve to twenty-four words (called a "seed phrase") are like the master key to all your Bitcoin. If you lose them or someone sees them, you lose everything. This lab teaches you what they are, how they are created, and how to protect them.',
+    glossarySeedPhrase: 'The 12-24 words that control all your Bitcoin. Like a master key—whoever has them controls your money.',
+    glossaryEntropy: 'Random numbers that make your phrase impossible to guess. The foundation of your security.',
+    glossaryChecksum: 'Extra data that helps detect if you wrote a word wrong when restoring.',
     generateEntropy: 'Generate New Seed',
-    entropyBits: 'Entropy (Random Bits)',
+    entropyBits: 'Randomness (foundation of your security)',
     entropyDesc: 'True randomness is the foundation of security',
-    checksum: 'Checksum',
+    checksum: 'Verification (detect typos)',
     checksumDesc: 'Error detection to catch typos',
-    seedPhrase: 'Seed Phrase (BIP39)',
+    seedPhrase: 'Your 12-24 key words',
     seedPhraseDesc: 'Human-readable representation of your master key',
     words12: '12 Words',
     words24: '24 Words',
@@ -165,13 +175,13 @@ const translations: Record<'en' | 'es', Translations> = {
     bitcoinDesc2: '❌ Hacked? No one can help',
     bitcoinDesc3: '❌ No recovery, no customer service',
     howItWorks: 'How a Seed Phrase is Born',
-    step1Title: 'Generate Entropy',
+    step1Title: 'Step 1: Randomness',
     step1Desc: '128 or 256 bits of true randomness (coin flips, dice, or computer)',
-    step2Title: 'Calculate Checksum',
-    step2Desc: 'First 4 or 8 bits of SHA256(entropy) added for error detection',
-    step3Title: 'Split into 11-bit Groups',
+    step2Title: 'Step 2: Verification',
+    step2Desc: 'First 4 or 8 bits added to detect if you wrote a word wrong',
+    step3Title: 'Step 3: Split into 11-bit Groups',
     step3Desc: 'Each group becomes an index (0-2047) for the BIP39 wordlist',
-    step4Title: 'Map to Words',
+    step4Title: 'Step 4: Map to Words',
     step4Desc: '2048 carefully chosen words that are easy to identify',
     entropy: 'Entropy',
     binary: 'Binary',
@@ -204,12 +214,17 @@ const translations: Record<'en' | 'es', Translations> = {
   es: {
     title: 'Laboratorio de Semilla',
     subtitle: 'Entiende las 12-24 palabras más importantes de tu viaje en Bitcoin',
+    introTitle: '¿Por qué importa esto?',
+    introText: 'En Bitcoin, tú controlas tu dinero. No hay banco que te recupere la contraseña. Hay 12-24 palabras (llamadas "frase semilla") que son como la llave maestra de todo tu Bitcoin. Si las pierdes o alguien las ve, pierdes todo. En este lab aprenderás qué son, cómo se crean y cómo protegerlas.',
+    glossarySeedPhrase: 'Las 12-24 palabras que controlan todo tu Bitcoin. Como una llave maestra—quien las tenga controla tu dinero.',
+    glossaryEntropy: 'Números aleatorios que hacen tu frase imposible de adivinar. La base de tu seguridad.',
+    glossaryChecksum: 'Dato extra para detectar si escribiste mal una palabra al restaurar.',
     generateEntropy: 'Generar Nueva Semilla',
-    entropyBits: 'Entropía (Bits Aleatorios)',
+    entropyBits: 'Aleatoriedad (base de tu seguridad)',
     entropyDesc: 'La verdadera aleatoriedad es la base de la seguridad',
-    checksum: 'Checksum',
+    checksum: 'Verificación (detectar errores)',
     checksumDesc: 'Detección de errores para detectar errores tipográficos',
-    seedPhrase: 'Frase Semilla (BIP39)',
+    seedPhrase: 'Tus 12-24 palabras clave',
     seedPhraseDesc: 'Representación legible de tu clave maestra',
     words12: '12 Palabras',
     words24: '24 Palabras',
@@ -233,13 +248,13 @@ const translations: Record<'en' | 'es', Translations> = {
     bitcoinDesc2: '❌ ¿Hackeado? Nadie puede ayudarte',
     bitcoinDesc3: '❌ Sin recuperación, sin servicio al cliente',
     howItWorks: 'Cómo Nace una Frase Semilla',
-    step1Title: 'Generar Entropía',
+    step1Title: 'Paso 1: Aleatoriedad',
     step1Desc: '128 o 256 bits de verdadera aleatoriedad (monedas, dados, o computadora)',
-    step2Title: 'Calcular Checksum',
-    step2Desc: 'Primeros 4 u 8 bits de SHA256(entropía) añadidos para detectar errores',
-    step3Title: 'Dividir en Grupos de 11 bits',
+    step2Title: 'Paso 2: Verificación',
+    step2Desc: 'Primeros 4 u 8 bits añadidos para detectar si escribiste mal una palabra',
+    step3Title: 'Paso 3: Dividir en Grupos de 11 bits',
     step3Desc: 'Cada grupo se convierte en índice (0-2047) para la lista BIP39',
-    step4Title: 'Mapear a Palabras',
+    step4Title: 'Paso 4: Mapear a Palabras',
     step4Desc: '2048 palabras cuidadosamente elegidas, fáciles de identificar',
     entropy: 'Entropía',
     binary: 'Binario',
@@ -508,36 +523,19 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </p>
         </motion.div>
 
-        {/* Critical Warning Banner */}
+        {/* Intro - Why this matters */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-red-500/10 border-2 border-red-500/50 rounded-2xl p-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-8"
         >
-          <h3 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 animate-pulse" />
-            {t.criticalWarning}
+          <h3 className="text-lg font-bold text-blue-400 mb-3 flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
+            {t.introTitle}
           </h3>
-          <p className="text-sm text-red-300 mb-4">{t.criticalWarningDesc}</p>
-          
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <p className="text-sm text-slate-400 font-mono">❌ {lang === 'en' ? 'NEVER' : 'NUNCA'}</p>
-              <ul className="text-sm space-y-1">
-                <li className="text-red-400">{t.neverShare}</li>
-                <li className="text-red-400">{t.neverDigital}</li>
-                <li className="text-red-400">{t.neverPhoto}</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm text-slate-400 font-mono">✅ {lang === 'en' ? 'ONLY' : 'SOLO'}</p>
-              <ul className="text-sm space-y-1">
-                <li className="text-green-400">{t.onlyPaper}</li>
-                <li className="text-green-400">{t.onlyMetal}</li>
-                <li className="text-green-400">{t.onlyMemorize}</li>
-              </ul>
-            </div>
-          </div>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            {t.introText}
+          </p>
         </motion.div>
 
         {/* Bank vs Bitcoin Comparison */}
@@ -604,6 +602,38 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 : '🔓 En Bitcoin, TÚ eres el banco. Tu semilla = tus claves = tu Bitcoin.'
               }
             </p>
+          </div>
+        </motion.div>
+
+        {/* Critical Warning Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-red-500/10 border-2 border-red-500/50 rounded-2xl p-6 mb-8"
+        >
+          <h3 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 animate-pulse" />
+            {t.criticalWarning}
+          </h3>
+          <p className="text-sm text-red-300 mb-4">{t.criticalWarningDesc}</p>
+          
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <p className="text-sm text-slate-400 font-mono">❌ {lang === 'en' ? 'NEVER' : 'NUNCA'}</p>
+              <ul className="text-sm space-y-1">
+                <li className="text-red-400">{t.neverShare}</li>
+                <li className="text-red-400">{t.neverDigital}</li>
+                <li className="text-red-400">{t.neverPhoto}</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-slate-400 font-mono">✅ {lang === 'en' ? 'ONLY' : 'SOLO'}</p>
+              <ul className="text-sm space-y-1">
+                <li className="text-green-400">{t.onlyPaper}</li>
+                <li className="text-green-400">{t.onlyMetal}</li>
+                <li className="text-green-400">{t.onlyMemorize}</li>
+              </ul>
+            </div>
           </div>
         </motion.div>
 
@@ -720,6 +750,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <Lock className="w-5 h-5 text-orange-400" />
                   {t.yourSeed}
+                  <InfoTooltip content={t.glossarySeedPhrase} />
                 </h3>
                 <div className="flex gap-2">
                   <motion.button
@@ -810,11 +841,17 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   animate={{ opacity: 1 }}
                   className="mt-4 p-3 bg-slate-800/50 rounded-xl"
                 >
-                  <p className="text-xs text-slate-500 mb-2">{t.entropyBits}:</p>
+                  <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                    {t.entropyBits}:
+                    <InfoTooltip content={t.glossaryEntropy} />
+                  </p>
                   <div className="font-mono text-xs text-slate-400 break-all leading-relaxed">
                     {entropy.slice(0, 64)}...
                   </div>
-                  <p className="text-xs text-slate-500 mt-2 mb-1">{t.checksum}:</p>
+                  <p className="text-xs text-slate-500 mt-2 mb-1 flex items-center gap-1">
+                    {t.checksum}:
+                    <InfoTooltip content={t.glossaryChecksum} />
+                  </p>
                   <div className="font-mono text-xs text-blue-400">
                     {checksum}
                   </div>

@@ -13,13 +13,10 @@ interface HiddenMenuProps {
 const translations = {
     en: {
         about: 'About Us',
-        adminZone: 'Developer Tools',
-        immuneDashboard: 'System Monitor',
-        nativeBeacon: 'Network Explorer',
+        labSection: 'Lab',
         seedLab: 'Seed Phrase Lab',
         merkleLab: 'Merkle Tree Lab',
         signingLab: 'ECDSA/Schnorr Lab',
-        challengeZone: 'Mining Simulator',
         secured: '🔐 Secured Connection',
         version: 'v2.0.1 • Secure Mode',
         close: 'Close menu',
@@ -27,9 +24,7 @@ const translations = {
     },
     es: {
         about: 'Sobre Nosotros',
-        adminZone: 'Herramientas Dev',
-        immuneDashboard: 'Monitor del Sistema',
-        nativeBeacon: 'Explorador de Red',
+        labSection: 'Laboratorio',
         seedLab: 'Lab Frase Semilla',
         merkleLab: 'Lab Árboles Merkle',
         signingLab: 'Lab ECDSA/Schnorr',
@@ -92,18 +87,14 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
 
     const handleAdminClick = (path: string) => {
         setIsOpen(false);
-        // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
-        const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
-        const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+        const fullPath = `/${lang}${path}`;
         setTimeout(() => router.push(fullPath), 150);
     };
 
     const handleAdminAuxClick = (e: React.MouseEvent, path: string) => {
         if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            // Only prefix with lang for new [lang] routes (seed-lab, merkle-lab, signing-lab)
-            const newLabPaths = ['/satoshi/seed-lab', '/satoshi/merkle-lab', '/satoshi/signing-lab'];
-            const fullPath = newLabPaths.includes(path) ? `/${lang}${path}` : path;
+            const fullPath = `/${lang}${path}`;
             window.open(fullPath, '_blank');
             setIsOpen(false);
         }
@@ -126,9 +117,6 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
         { title: t.seedLab, path: '/satoshi/seed-lab', icon: Fingerprint, highlight: true },
         { title: t.merkleLab, path: '/satoshi/merkle-lab', icon: TreeDeciduous },
         { title: t.signingLab, path: '/satoshi/signing-lab', icon: Key },
-        { title: t.immuneDashboard, path: '/satoshi/immune-dashboard', icon: Shield },
-        { title: t.nativeBeacon, path: '/satoshi/beacon/native', icon: Zap },
-        { title: t.challengeZone, path: '/challenge/pow', icon: Terminal },
     ];
 
     return (
@@ -235,7 +223,7 @@ export function HiddenMenu({ lang }: HiddenMenuProps) {
 
                             <div>
                                 <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
-                                    {t.adminZone}
+                                    {t.labSection}
                                 </p>
                                 <nav className="space-y-1" aria-label="Admin navigation">
                                     {menuItems.map((item) => (

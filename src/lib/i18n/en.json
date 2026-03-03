@@ -2,8 +2,10 @@
   "hero": {
     "title": "Bitcoin",
     "subtitle": "Global Settlement Layer",
-    "cta": "Explore the Network",
-    "secondaryCta": "View Market Data",
+    "description": "Decentralized infrastructure for transferring value. Open, permissionless, always running—like email, but for money.",
+    "cta": "Ask about Bitcoin",
+    "secondaryCta": "Buy Bitcoin in Mexico",
+    "tertiaryCta": "Why Bitcoin for Mexico?",
     "stats": {
       "nodes": "Verified Nodes",
       "uptime": "Uptime",
@@ -50,15 +52,24 @@
     "supply": "Supply"
   },
   "chat": {
-    "placeholder": "Ask me about Bitcoin protocol, Lightning, or mining...",
+    "title": "Talk to Bitcoin Agent",
+    "subtitle": "Ask anything: what Bitcoin is, how to buy it, why it matters. I explain everything in plain language. What can I help you with?",
+    "placeholder": "Ask anything: What is Bitcoin? How do I buy?",
     "thinking": "Analyzing blockchain data...",
-    "welcome": "Welcome to Bitcoin Agent. I can help you understand:\n\n• Bitcoin protocol & consensus mechanisms\n• Lightning Network & payment channels\n• Mining & proof of work\n• Wallet security & best practices\n• On-chain vs off-chain transactions\n\nWhat would you like to learn?",
+    "welcome": "Hi! I'm your guide to learning Bitcoin from scratch. You don't need any prior knowledge. You can ask me things like:\n\n• What is Bitcoin and why does it matter?\n• How does it protect me from inflation?\n• What is a \"seed phrase\" and why is it so important?\n• How do I send money to my family cheaper than Western Union?\n• How do I buy Bitcoin in Mexico?\n\nPick one or type your own question.",
     "error": "Failed to get response. Please try again.",
-    "send": "Send"
+    "send": "Send",
+    "suggestedQuestions": [
+      "What is Bitcoin in simple words?",
+      "Why Bitcoin for someone in Mexico?",
+      "What is a seed phrase?",
+      "How do I buy Bitcoin with my bank?",
+      "How does it protect me from inflation?"
+    ]
   },
   "tip": {
-    "title": "Power the Mission",
-    "description": "Your sats fund the Bitcoin Agent infrastructure—servers, APIs, and continuous improvements.",
+    "title": "Leave a tip",
+    "description": "Your tip is voluntary. Sats you send help keep this project running—servers, APIs, and improvements. Thanks for your support!",
     "button": "Send Sats",
     "success": "Zap received! ⚡",
     "error": "Payment failed. Please try again.",

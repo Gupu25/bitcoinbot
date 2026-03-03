@@ -1,10 +1,9 @@
 import { HeroSection } from '@/components/hero/HeroSection';
 import { PartnersCarousel } from '@/components/economies/CircularEconomiesCarousel';
-import { MarketSection } from '@/components/markets/MarketSection';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { TipJar } from '@/components/tip-jar/TipJar';
 import { Footer } from '@/components/footer/Footer';
-import { ProtocolLayers } from '@/components/protocol-layers/ProtocolLayers';
+import { WhyBitcoinForMexico } from '@/components/why-bitcoin/WhyBitcoinForMexico';
 import { getDictionary, isLocale, defaultLocale } from '@/lib/i18n/config';
 import type { TranslationKeys } from '@/lib/i18n/types';
 import fallbackDict from '@/lib/i18n/en.json';
@@ -44,25 +43,17 @@ export default async function Home({ params }: { params: { lang: string } }) {
         <HeroSection lang={lang} dict={dict.hero} />
       </section>
 
-      {/* 🐱 FIX #6: NUEVO ORDEN - Educación primero, luego interacción */}
-      {/* Protocol Layers – Explicación técnica (aprender antes de hablar) */}
-      <section id="protocol" className="scroll-mt-20">
-        <ProtocolLayers lang={lang} />
-      </section>
+      {/* Why Bitcoin for Mexico – beneficios en lenguaje simple */}
+      <WhyBitcoinForMexico lang={lang} />
 
-      {/* Chat – El protagonista (ahora el usuario sabe de qué hablar) */}
+      {/* Chat – Pregunta lo que quieras */}
       <section id="chat" className="scroll-mt-20">
         <ChatInterface lang={lang} dict={dict.chat} />
       </section>
 
-      {/* Comunidades – Prueba social viva */}
+      {/* Comprar Bitcoin en México */}
       <section id="economies" className="scroll-mt-20">
         <PartnersCarousel lang={lang} />
-      </section>
-
-      {/* Mercado – Datos en vivo */}
-      <section id="markets" className="scroll-mt-20">
-        <MarketSection lang={lang} />
       </section>
 
       {/* TipJar – Cierre emocional */}

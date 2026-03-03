@@ -245,15 +245,23 @@ export function PartnersCarousel({ lang = 'en' }: { lang?: 'en' | 'es' }) {
 
   const labels = {
     en: {
-      title: 'Buy Bitcoin',
-      subtitle: 'Trusted partners to stack sats',
+      title: 'Buy Bitcoin in Mexico',
+      subtitle: 'Recommended platforms to buy with pesos',
+      intro: 'Bitcoin is digital money that you control. In Mexico you can buy it using your bank (SPEI transfer) or card. These partners let you convert pesos to Bitcoin securely.',
+      newPointer: 'Never bought Bitcoin? Ask in the chat: "How do I buy Bitcoin in Mexico?" or "What do I need to get started?"',
+      glossarySPEI: 'Bank transfer in Mexico, available 24/7.',
+      glossaryLightning: 'Instant Bitcoin payments, ideal for small amounts.',
       pause: 'Pause',
       play: 'Play',
       footer: '🤝 These partners help us maintain BOB • Thank you for supporting them',
     },
     es: {
-      title: 'Comprar Bitcoin',
-      subtitle: 'Partners confiables para acumular sats',
+      title: 'Comprar Bitcoin en México',
+      subtitle: 'Plataformas recomendadas para comprar con pesos',
+      intro: 'Bitcoin es dinero digital que tú controlas. En México puedes comprarlo usando tu banco (transferencia SPEI) o tarjeta. Estos socios te permiten convertir pesos a Bitcoin de forma segura.',
+      newPointer: '¿Nunca has comprado Bitcoin? Pregunta en el chat: "¿Cómo compro Bitcoin en México?" o "¿Qué necesito para empezar?"',
+      glossarySPEI: 'Transferencia bancaria en México, disponible 24/7.',
+      glossaryLightning: 'Pagos instantáneos con Bitcoin, ideal para cantidades pequeñas.',
       pause: 'Pausar',
       play: 'Reanudar',
       footer: '🤝 Estos partners nos ayudan a mantener BOB • Gracias por apoyarlos',
@@ -264,21 +272,38 @@ export function PartnersCarousel({ lang = 'en' }: { lang?: 'en' | 'es' }) {
   return (
     <section className="w-full py-12 sm:py-16 lg:py-20 bg-slate-950 border-t border-slate-800/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white font-mono mb-1">
-              {t.title}
-            </h2>
-            <p className="text-sm sm:text-base text-slate-500">{t.subtitle}</p>
+        {/* Header + Intro */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white font-mono mb-1">
+                {t.title}
+              </h2>
+              <p className="text-sm sm:text-base text-slate-500">{t.subtitle}</p>
+            </div>
+            <button
+              onClick={() => setIsPaused((p) => !p)}
+              className="self-start sm:self-auto p-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all"
+              aria-label={isPaused ? t.play : t.pause}
+            >
+              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            </button>
           </div>
-          <button
-            onClick={() => setIsPaused((p) => !p)}
-            className="self-start sm:self-auto p-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all"
-            aria-label={isPaused ? t.play : t.pause}
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-4 max-w-2xl">
+            {t.intro}
+          </p>
+          {/* I'm new pointer */}
+          <a
+            href="#chat-section"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/20 transition-colors"
           >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-          </button>
+            {t.newPointer}
+          </a>
+          {/* Inline glossary */}
+          <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
+            <span><strong className="text-slate-400">SPEI:</strong> {t.glossarySPEI}</span>
+            <span><strong className="text-slate-400">Lightning:</strong> {t.glossaryLightning}</span>
+          </div>
         </div>
 
         {/* Carousel Container */}

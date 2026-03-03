@@ -40,6 +40,12 @@ export default function RootLayout({
                 className={`${jetbrainsMono.variable} ${inter.variable} bg-terminal-black text-terminal-green font-mono antialiased`}
                 suppressHydrationWarning
             >
+                {/* Inline script: evita auto-scroll a hash/restauración ANTES de cualquier otro código */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(){if('scrollRestoration'in history)history.scrollRestoration='manual';if(location.hash){history.replaceState(null,'',location.pathname+location.search)}window.scrollTo(0,0)})();`,
+                    }}
+                />
                 {children}
             </body>
         </html>

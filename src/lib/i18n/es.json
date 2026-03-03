@@ -1,9 +1,11 @@
 {
   "hero": {
     "title": "Bitcoin",
-    "subtitle": "Capa de Liquidación Global",
-    "cta": "Explorar la Red",
-    "secondaryCta": "Ver Datos de Mercado",
+    "subtitle": "Tu dinero, bajo tu control",
+    "description": "Una red abierta para enviar, recibir y ahorrar valor. Sin bancos ni permisos. Funciona 24/7—como el internet, pero para tu dinero.",
+    "cta": "Preguntar lo que sea sobre Bitcoin",
+    "secondaryCta": "Comprar Bitcoin en México",
+    "tertiaryCta": "¿Por qué Bitcoin para México?",
     "stats": {
       "nodes": "Nodos Verificados",
       "uptime": "Tiempo Activo",
@@ -50,15 +52,24 @@
     }
   },
   "chat": {
-    "placeholder": "Pregúntame sobre el protocolo Bitcoin, Lightning, o minería...",
+    "title": "Chatea con Bitcoin Agent",
+    "subtitle": "Pregunta lo que sea: qué es Bitcoin, cómo comprar, por qué te conviene. Te explico todo en español, sin jerga. ¿En qué te ayudo?",
+    "placeholder": "Pregunta lo que sea: ¿Qué es Bitcoin? ¿Cómo compro?",
     "thinking": "Analizando datos de la blockchain...",
-    "welcome": "Bienvenido a Bitcoin Agent. Puedo ayudarte a entender:\n\n• Protocolo Bitcoin y mecanismos de consenso\n• Lightning Network y canales de pago\n• Minería y prueba de trabajo\n• Seguridad de billeteras y mejores prácticas\n• Transacciones on-chain vs off-chain\n\n¿Qué te gustaría aprender?",
+    "welcome": "Hola. Soy tu guía para aprender Bitcoin desde cero. No necesitas saber nada previo. Elige una o escribe tu propia pregunta.",
     "error": "Error al obtener respuesta. Intenta de nuevo.",
-    "send": "Enviar"
+    "send": "Enviar",
+    "suggestedQuestions": [
+      "¿Qué es Bitcoin en palabras simples?",
+      "¿Por qué Bitcoin para alguien en México?",
+      "¿Qué es una frase semilla?",
+      "¿Cómo compro Bitcoin con mi banco?",
+      "¿Cómo me protege del aumento de precios?"
+    ]
   },
   "tip": {
-    "title": "Impulsa la Misión",
-    "description": "Tus sats mantienen vivo el Bitcoin Agent—servidores, APIs y mejoras continuas.",
+    "title": "Deja una propina",
+    "description": "Tu propina es voluntaria. Los sats que envíes ayudan a mantener este proyecto—servidores, APIs y mejoras. ¡Gracias por apoyar!",
     "button": "Enviar Sats",
     "success": "¡Zap recibido! ⚡",
     "error": "El pago falló. Por favor intenta de nuevo.",

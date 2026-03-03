@@ -9,6 +9,8 @@ interface TerminalWindowProps {
   lines?: TerminalLine[];
   isLoading?: boolean;
   children?: ReactNode;
+  /** Content that scrolls with messages (e.g. suggested question chips) */
+  scrollableSlot?: ReactNode;
   className?: string;
   title?: string;
 }
@@ -17,6 +19,7 @@ export function TerminalWindow({
   lines = [],
   isLoading,
   children,
+  scrollableSlot,
   className = '',
   title
 }: TerminalWindowProps) {
@@ -27,8 +30,9 @@ export function TerminalWindow({
   // Track si el usuario hizo scroll manual para no interrumpir lectura
   const userScrolledRef = useRef(false);
   const lastLineCountRef = useRef(lines.length);
+  const hasMountedRef = useRef(false);
 
-  // Scroll inteligente: solo si es mensaje nuevo y usuario no hizo scroll arriba
+  // Scroll inteligente: solo si es mensaje nuevo (no en carga inicial)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -36,13 +40,16 @@ export function TerminalWindow({
     const isNewMessage = lines.length > lastLineCountRef.current;
     lastLineCountRef.current = lines.length;
 
-    // Solo auto-scroll si:
-    // 1. Es un mensaje completamente nuevo (no streaming de chunks)
-    // 2. El usuario no ha scrolleado manualmente hacia arriba
+    // Skip scroll on initial load (welcome message) — evita auto-scroll a secciones bajas
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
     if (isNewMessage && !userScrolledRef.current) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [lines.length]); // Solo depende de length, no del contenido completo
+  }, [lines.length]);
 
   // Detectar scroll manual del usuario
   useEffect(() => {
@@ -125,9 +132,9 @@ export function TerminalWindow({
   };
 
   return (
-    <div className={`bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl ${className}`}>
+    <div className={`w-full min-w-0 max-w-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl ${className}`}>
       {/* Header */}
-      <div className="bg-slate-950 px-4 py-3 flex items-center gap-3 border-b border-slate-800">
+      <div className="bg-slate-950 px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 border-b border-slate-800">
         <div className="flex gap-2">
           <div className="w-3 h-3 rounded-full bg-red-500/80" />
           <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
@@ -151,11 +158,11 @@ export function TerminalWindow({
       {/* Content */}
       <div
         ref={containerRef}
-        className={`p-4 overflow-y-auto font-mono text-sm scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent scroll-smooth ${!title && lines.length > 0 ? 'h-[50vh] min-h-[300px] max-h-[600px]' : 'min-h-[200px]'}`}
+        className={`p-3 sm:p-4 overflow-x-hidden overflow-y-auto font-mono text-sm sm:text-base scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent scroll-smooth ${!title && lines.length > 0 ? 'min-h-[160px] max-h-[50dvh] sm:min-h-[220px] sm:max-h-[55dvh] md:min-h-[280px] md:max-h-[600px]' : 'min-h-[120px] sm:min-h-[160px]'}`}
         aria-live="polite"
         aria-atomic="false"
       >
-        {lines.length === 0 && !isLoading && !children && (
+        {lines.length === 0 && !isLoading && !children && !scrollableSlot && (
           <div className="flex items-center justify-center h-full text-slate-600">
             <span className="text-xs">Type a message to start...</span>
           </div>
@@ -169,13 +176,13 @@ export function TerminalWindow({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.15 }}
-              className="group relative mb-3"
+              className="group relative mb-3 min-w-0"
             >
               <span className="absolute -left-16 top-0 text-[10px] text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
                 {line.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
 
-              <div className={`${line.type === 'input'
+              <div className={`min-w-0 break-words ${line.type === 'input'
                   ? 'text-orange-400'
                   : line.type === 'error'
                     ? 'text-red-400'
@@ -184,33 +191,22 @@ export function TerminalWindow({
                       : 'text-slate-300'
                 }`}>
                 {line.type === 'input' && (
-                  <span className="text-orange-500/50 mr-2 select-none">{'➜'}</span>
+                  <span className="text-orange-500/50 mr-2 select-none shrink-0">{'➜'}</span>
                 )}
                 {line.type === 'output' && (
-                  <span className="text-slate-600 mr-2 select-none">{'◆'}</span>
+                  <span className="text-slate-600 mr-2 select-none shrink-0">{'◆'}</span>
                 )}
 
-                <div className="inline-block align-top max-w-full whitespace-pre-wrap">
+                <div className="block w-full min-w-0 break-words whitespace-pre-wrap">
                   {formatContent(line.content)}
                 </div>
-
-                {line.type === 'output' && (
-                  <button
-                    onClick={() => copyToClipboard(line.content, line.id)}
-                    className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-orange-400"
-                    title="Copy response"
-                  >
-                    {copiedId === line.id ? (
-                      <Check className="w-3 h-3" />
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}
-                  </button>
-                )}
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {/* Chips / suggested questions — scroll with messages */}
+        {scrollableSlot}
 
         {/* Loading indicator */}
         {isLoading && (
@@ -236,17 +232,17 @@ export function TerminalWindow({
             </span>
             <span className="text-xs italic">mining blocks...</span>
           </motion.div>
-        )}
+          )}
 
-        {/* Input area */}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Form — always visible, does not scroll */}
         {children && (
-          <div className="mt-6 pt-4 border-t border-slate-800 sticky bottom-0 bg-slate-900">
+          <div className="shrink-0 border-t border-slate-800 bg-slate-900">
             {children}
           </div>
         )}
-
-        <div ref={bottomRef} />
-      </div>
     </div>
   );
 }
