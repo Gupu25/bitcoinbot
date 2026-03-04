@@ -32,6 +32,11 @@ export type TranslationKeys = typeof en & {
   markets: MarketsTranslation;
   whyMexico?: any;
   partners?: any;
+  hiddenMenu?: any;
+  about?: any;
+  seedLab?: any;
+  merkleLab?: any;
+  miningLab?: any;
 };
 
 export type Locale = 'en' | 'es';

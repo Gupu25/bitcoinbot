@@ -26,20 +26,16 @@ Ask anything! "What's a private key?" "How does mining work?" "Why is my transac
 
 B.O.B. uses a curated knowledge base (Bitcoin whitepaper, educational books) to give you accurate answers, not AI hallucinations.
 
-### 🔢 Seed Phrase Lab
-**The most important lesson in Bitcoin.** Generate entropy, see how seed phrases work, and learn why that 12-word phrase is literally your money. Interactive, visual, and beginner-friendly.
+## 🎓 Educational Labs (Hackathon Focus)
 
-### 🌳 Merkle Tree Lab
-Build Merkle trees with your own hands (well, mouse). Understand how Bitcoin verifies transactions without downloading the entire blockchain. SPV proofs demystified!
+- 🔢 Seed Phrase Lab - `/satoshi/seed-lab`
+- 🌳 Merkle Tree Lab - `/satoshi/merkle-lab`  
+- ⛏️ Mining Simulator - `/satoshi/mining-lab` ← NEW!
+- 🔐 Signing Lab - `/satoshi/signing-lab`
 
-### 🔐 Signing Lab
-Play with digital signatures. See the difference between ECDSA and Schnorr. Simulate a MuSig aggregation. Even see what happens when you reuse nonces (spoiler: bad things!).
-
-### ⛏️ Mining Simulator
-Experience Proof-of-Work. Feel why Bitcoin's security comes from real energy, not magic.
-
-### ⚡ Lightning Tip Jar
-Support the project with real Lightning payments. Generate invoices, scan QR codes, or use WebLN if your browser supports it.
+### 🔐 Security Features (Production - Archived)
+The PoW Challenge system is archived in `/src/archive` for production deployment.
+For this hackathon demo, we're focusing 100% on education over security.
 
 ---
 

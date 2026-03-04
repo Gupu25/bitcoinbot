@@ -52,7 +52,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
       {/* 🇲🇽 2) WHY BITCOIN FOR MEXICO – Educación contextualizada */}
       <section id="why-mexico" className="scroll-mt-20">
-        <WhyBitcoinForMexico lang={lang} dict={dict.whyMexico} />
+        <WhyBitcoinForMexico lang={lang} />
       </section>
 
       {/* 🤖 3) CHAT – Interactúa con B.O.B., tu tutor AI */}

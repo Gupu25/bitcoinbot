@@ -2,18 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Dices, Shield, AlertTriangle, Key, Eye, EyeOff, 
+import {
+  Dices, Shield, AlertTriangle, Key, Eye, EyeOff,
   Copy, Check, RefreshCw, BookOpen, Sparkles,
   Lock, Unlock, Trash2, Zap, FileText, Fingerprint,
-  Wallet, Building2, XCircle, CheckCircle, HelpCircle
+  Wallet, Building2, XCircle, CheckCircle, HelpCircle,
+  GraduationCap, Trophy, Info
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 
-// 🔢 Entropy → Seed Phrase Visualizer
-// The MOST IMPORTANT lesson for Bitcoin newcomers!
-
+// ============================================================================
 // BIP39 Wordlist (English - first 256 words for demo)
+// ============================================================================
 const BIP39_WORDS = [
   'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract',
   'absurd', 'abuse', 'access', 'accident', 'account', 'accuse', 'achieve', 'acid',
@@ -53,16 +53,17 @@ const BIP39_WORDS = [
   'cash', 'casino', 'castle', 'casual', 'cat', 'catalog', 'catch', 'category'
 ];
 
-// Extended wordlist simulation (in production, use full 2048 words)
 const getWord = (index: number): string => {
   const wordIndex = index % 2048;
   if (wordIndex < BIP39_WORDS.length) {
     return BIP39_WORDS[wordIndex];
   }
-  // Simulate remaining words
   return `word${wordIndex}`;
 };
 
+// ============================================================================
+// Translations - 🇲🇽 Spanish-First Microcopy para Mexicanos
+// ============================================================================
 interface Translations {
   title: string;
   subtitle: string;
@@ -71,6 +72,7 @@ interface Translations {
   glossarySeedPhrase: string;
   glossaryEntropy: string;
   glossaryChecksum: string;
+  glossary11bits: string;
   generateEntropy: string;
   entropyBits: string;
   entropyDesc: string;
@@ -117,6 +119,7 @@ interface Translations {
   showSeed: string;
   hideSeed: string;
   regenerate: string;
+  regenerateConfirm: string;
   quiz: string;
   quizTitle: string;
   quizDesc: string;
@@ -135,6 +138,16 @@ interface Translations {
   totalBits: string;
   checksumBits: string;
   finalBits: string;
+  labCompleted: string;
+  labCompletedDesc: string;
+  startQuiz: string;
+  question: string;
+  score: string;
+  tryAgain: string;
+  complete: string;
+  bip39Standard: string;
+  bip39Desc: string;
+  makeSureNoOneWatching: string;
 }
 
 const translations: Record<'en' | 'es', Translations> = {
@@ -146,6 +159,7 @@ const translations: Record<'en' | 'es', Translations> = {
     glossarySeedPhrase: 'The 12-24 words that control all your Bitcoin. Like a master key—whoever has them controls your money.',
     glossaryEntropy: 'Random numbers that make your phrase impossible to guess. The foundation of your security.',
     glossaryChecksum: 'Extra data that helps detect if you wrote a word wrong when restoring.',
+    glossary11bits: 'Each 11-bit group maps to one of 2048 words (2^11 = 2048). This makes your seed readable but still secure!',
     generateEntropy: 'Generate New Seed',
     entropyBits: 'Randomness (foundation of your security)',
     entropyDesc: 'True randomness is the foundation of security',
@@ -156,12 +170,12 @@ const translations: Record<'en' | 'es', Translations> = {
     words12: '12 Words',
     words24: '24 Words',
     yourSeed: 'Your Seed Phrase',
-    criticalWarning: '⚠️ CRITICAL SECURITY RULES',
-    criticalWarningDesc: 'Violating these rules can result in PERMANENT loss of funds',
-    neverShare: '❌ NEVER share your seed with anyone',
-    neverDigital: '❌ NEVER store digitally (photos, cloud, email)',
-    neverPhoto: '❌ NEVER take a screenshot',
-    neverCloud: '❌ NEVER paste in password managers',
+    criticalWarning: '⚠️ GOLDEN RULES',
+    criticalWarningDesc: 'These rules protect your bitcoins forever',
+    neverShare: '❌ Never share with anyone, not even your best friend',
+    neverDigital: '❌ Never store digitally (photos, cloud, email)',
+    neverPhoto: '❌ Never take a screenshot',
+    neverCloud: '❌ Never paste in password managers',
     onlyPaper: '✅ Write on paper only',
     onlyMetal: '✅ Etch on metal for fire resistance',
     onlyMemorize: '✅ Memorize and destroy paper',
@@ -192,6 +206,7 @@ const translations: Record<'en' | 'es', Translations> = {
     showSeed: 'Show Seed',
     hideSeed: 'Hide Seed',
     regenerate: 'Generate New Seed',
+    regenerateConfirm: 'Generate new seed? Current one will be lost (make sure you saved it if it was important!)',
     quiz: 'Test Your Knowledge',
     quizTitle: 'Seed Security Quiz',
     quizDesc: 'Prove you understand seed phrase security',
@@ -210,6 +225,16 @@ const translations: Record<'en' | 'es', Translations> = {
     totalBits: 'Total bits',
     checksumBits: 'Checksum bits',
     finalBits: 'Final entropy',
+    labCompleted: '🎉 Lab Completed!',
+    labCompletedDesc: 'Now you understand why your seed phrase is your most valuable treasure 💎',
+    startQuiz: 'Start Quiz',
+    question: 'Question',
+    score: 'Score',
+    tryAgain: 'Try Again',
+    complete: 'Complete',
+    bip39Standard: 'BIP39 Standard',
+    bip39Desc: 'BIP39 defines the standard for mnemonic codes. It uses 2048 carefully selected words from various languages to create human-readable backups of cryptographic keys.',
+    makeSureNoOneWatching: '(Make sure no one is watching!)',
   },
   es: {
     title: 'Laboratorio de Semilla',
@@ -219,6 +244,7 @@ const translations: Record<'en' | 'es', Translations> = {
     glossarySeedPhrase: 'Las 12-24 palabras que controlan todo tu Bitcoin. Como una llave maestra—quien las tenga controla tu dinero.',
     glossaryEntropy: 'Números aleatorios que hacen tu frase imposible de adivinar. La base de tu seguridad.',
     glossaryChecksum: 'Dato extra para detectar si escribiste mal una palabra al restaurar.',
+    glossary11bits: 'Cada grupo de 11 bits mapea a una de 2048 palabras (2^11 = 2048). ¡Esto hace tu semilla legible pero segura!',
     generateEntropy: 'Generar Nueva Semilla',
     entropyBits: 'Aleatoriedad (base de tu seguridad)',
     entropyDesc: 'La verdadera aleatoriedad es la base de la seguridad',
@@ -229,15 +255,15 @@ const translations: Record<'en' | 'es', Translations> = {
     words12: '12 Palabras',
     words24: '24 Palabras',
     yourSeed: 'Tu Frase Semilla',
-    criticalWarning: '⚠️ REGLAS CRÍTICAS DE SEGURIDAD',
-    criticalWarningDesc: 'Violar estas reglas puede resultar en pérdida PERMANENTE de fondos',
-    neverShare: '❌ NUNCA compartas tu semilla con nadie',
-    neverDigital: '❌ NUNCA guardes digitalmente (fotos, nube, email)',
-    neverPhoto: '❌ NUNCA tomes captura de pantalla',
-    neverCloud: '❌ NUNCA pegues en gestores de contraseñas',
-    onlyPaper: '✅ Escribe solo en papel',
-    onlyMetal: '✅ Graba en metal para resistencia al fuego',
-    onlyMemorize: '✅ Memoriza y destruye el papel',
+    criticalWarning: '⚠️ REGLAS DE ORO',
+    criticalWarningDesc: 'Estas reglas protegen tus bitcoins para siempre',
+    neverShare: '❌ Jamás la compartas, ni con tu mejor amigo',
+    neverDigital: '❌ Jamás la guardes digitalmente (fotos, nube, email)',
+    neverPhoto: '❌ Jamás tomes captura de pantalla',
+    neverCloud: '❌ Jamás la pegues en gestores de contraseñas',
+    onlyPaper: '✅ Anótala en papel, como en los viejos tiempos',
+    onlyMetal: '✅ Grábala en metal para resistencia al fuego',
+    onlyMemorize: '✅ Memorízala y destruye el papel',
     bankVsBitcoin: 'Banco vs Bitcoin: La Diferencia Clave',
     bankTitle: '🏦 Banco Tradicional',
     bitcoinTitle: '₿ Bitcoin',
@@ -265,6 +291,7 @@ const translations: Record<'en' | 'es', Translations> = {
     showSeed: 'Mostrar Semilla',
     hideSeed: 'Ocultar Semilla',
     regenerate: 'Generar Nueva Semilla',
+    regenerateConfirm: '¿Generar nueva semilla? La actual se perderá (¡asegúrate de haberla guardado si era importante!)',
     quiz: 'Pon a Prueba tu Conocimiento',
     quizTitle: 'Quiz de Seguridad de Semilla',
     quizDesc: 'Demuestra que entiendes la seguridad de frases semilla',
@@ -283,14 +310,25 @@ const translations: Record<'en' | 'es', Translations> = {
     totalBits: 'Bits totales',
     checksumBits: 'Bits de checksum',
     finalBits: 'Entropía final',
+    labCompleted: '🎉 ¡Lab Completado!',
+    labCompletedDesc: 'Ahora entiendes por qué tu frase semilla es tu tesoro más valioso 💎',
+    startQuiz: 'Iniciar Quiz',
+    question: 'Pregunta',
+    score: 'Puntuación',
+    tryAgain: 'Intentar de Nuevo',
+    complete: 'Completar',
+    bip39Standard: 'Estándar BIP39',
+    bip39Desc: 'BIP39 define el estándar para códigos mnemónicos. Usa 2048 palabras cuidadosamente seleccionadas de varios idiomas para crear respaldos legibles de claves criptográficas.',
+    makeSureNoOneWatching: '(¡Asegúrate de que nadie esté viendo!)',
   },
 };
 
-// 🔢 Generate random entropy
+// ============================================================================
+// Helper Functions
+// ============================================================================
 function generateEntropy(bits: 128 | 256): string {
   const bytes = bits / 8;
   const array = new Uint8Array(bytes);
-  
   if (typeof window !== 'undefined' && window.crypto) {
     window.crypto.getRandomValues(array);
   } else {
@@ -298,26 +336,21 @@ function generateEntropy(bits: 128 | 256): string {
       array[i] = Math.floor(Math.random() * 256);
     }
   }
-  
-  // Convert to binary string
   return Array.from(array)
     .map(b => b.toString(2).padStart(8, '0'))
     .join('');
 }
 
-// 🔐 Calculate checksum (simulated SHA-256)
 function calculateChecksum(entropy: string): string {
   let hash = 0n;
   for (let i = 0; i < entropy.length; i++) {
     hash = ((hash << 5n) - hash) + BigInt(entropy[i] === '1' ? 1 : 0);
     hash = hash & ((1n << 256n) - 1n);
   }
-  
-  const checksumLength = entropy.length / 32; // 4 for 128-bit, 8 for 256-bit
+  const checksumLength = entropy.length / 32;
   return hash.toString(2).padStart(256, '0').slice(0, checksumLength);
 }
 
-// 📝 Convert entropy + checksum to seed phrase
 interface SeedWord {
   word: string;
   index: number;
@@ -329,8 +362,6 @@ function entropyToSeedPhrase(entropy: string): SeedWord[] {
   const checksum = calculateChecksum(entropy);
   const combined = entropy + checksum;
   const words: SeedWord[] = [];
-  
-  // Split into 11-bit chunks
   for (let i = 0; i < combined.length; i += 11) {
     const chunk = combined.slice(i, i + 11);
     if (chunk.length === 11) {
@@ -339,15 +370,13 @@ function entropyToSeedPhrase(entropy: string): SeedWord[] {
         word: getWord(index),
         index,
         binary: chunk,
-        entropyBits: chunk.slice(0, 8), // Show first 8 bits from entropy
+        entropyBits: chunk.slice(0, 8),
       });
     }
   }
-  
   return words;
 }
 
-// ❓ Quiz questions
 interface QuizQuestion {
   question: string;
   options: string[];
@@ -357,10 +386,10 @@ interface QuizQuestion {
 
 const getQuizQuestions = (lang: 'en' | 'es'): QuizQuestion[] => [
   {
-    question: lang === 'en' 
-      ? 'What is the SAFEST way to backup your seed phrase?' 
+    question: lang === 'en'
+      ? 'What is the SAFEST way to backup your seed phrase?'
       : '¿Cuál es la forma MÁS SEGURA de respaldar tu frase semilla?',
-    options: lang === 'en' 
+    options: lang === 'en'
       ? ['Screenshot on phone', 'Email to yourself', 'Etched on metal plate', 'Saved in Notes app']
       : ['Captura en el celular', 'Email a ti mismo', 'Grabado en placa de metal', 'Guardado en Notas'],
     correct: 2,
@@ -406,10 +435,12 @@ const getQuizQuestions = (lang: 'en' | 'es'): QuizQuestion[] => [
   },
 ];
 
+// ============================================================================
+// Main Component
+// ============================================================================
 export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } }) {
   const lang = params.lang || 'en';
   const t = translations[lang];
-  
   const [wordCount, setWordCount] = useState<12 | 24>(12);
   const [entropy, setEntropy] = useState<string>('');
   const [seedWords, setSeedWords] = useState<SeedWord[]>([]);
@@ -417,7 +448,8 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [showVisualization, setShowVisualization] = useState(true);
-  
+  const [labCompleted, setLabCompleted] = useState(false);
+
   // Quiz state
   const [quizStarted, setQuizStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -425,11 +457,14 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
-  
   const quizQuestions = getQuizQuestions(lang);
-  
-  // Generate new seed
+
   const generateNewSeed = useCallback(() => {
+    // 🔐 Confirm before regenerating if seed is visible
+    if (showSeed && seedWords.length > 0) {
+      const confirmed = window.confirm(t.regenerateConfirm);
+      if (!confirmed) return;
+    }
     const bits = wordCount === 12 ? 128 : 256;
     const newEntropy = generateEntropy(bits);
     setEntropy(newEntropy);
@@ -437,31 +472,27 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
     setShowSeed(false);
     setActiveStep(0);
     setCopied(false);
-  }, [wordCount]);
-  
-  // Generate on mount
+  }, [wordCount, showSeed, seedWords.length, t.regenerateConfirm]);
+
   useEffect(() => {
     generateNewSeed();
   }, [generateNewSeed]);
-  
-  // Copy seed phrase
+
   const copySeed = async () => {
     const phrase = seedWords.map(w => w.word).join(' ');
     await navigator.clipboard.writeText(phrase);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
-  // Handle quiz answer
+
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
     setShowResult(true);
-    
     if (answerIndex === quizQuestions[currentQuestion].correct) {
       setScore(score + 1);
     }
   };
-  
+
   const nextQuestion = () => {
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -469,9 +500,10 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
       setShowResult(false);
     } else {
       setQuizComplete(true);
+      setLabCompleted(true); // 🎓 Mark lab as completed!
     }
   };
-  
+
   const resetQuiz = () => {
     setQuizStarted(false);
     setCurrentQuestion(0);
@@ -480,8 +512,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
     setScore(0);
     setQuizComplete(false);
   };
-  
-  // Animate steps
+
   useEffect(() => {
     if (entropy) {
       const interval = setInterval(() => {
@@ -490,7 +521,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
       return () => clearInterval(interval);
     }
   }, [entropy]);
-  
+
   const checksum = entropy ? calculateChecksum(entropy) : '';
   const totalBits = wordCount === 12 ? 128 : 256;
   const checksumBits = wordCount === 12 ? 4 : 8;
@@ -498,22 +529,22 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
   return (
     <div className="min-h-screen bg-slate-950 text-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <motion.div 
+          <motion.div
             className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-full px-4 py-2 mb-4"
             whileHover={{ scale: 1.05 }}
           >
             <Shield className="w-4 h-4 text-red-400" />
             <span className="text-red-400 text-sm font-mono uppercase tracking-wider">
-              Most Important Lesson
+              {lang === 'es' ? 'Lección Más Importante' : 'Most Important Lesson'}
             </span>
           </motion.div>
-          
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
             <Key className="w-10 h-10 text-orange-400" />
             {t.title}
@@ -523,7 +554,31 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </p>
         </motion.div>
 
-        {/* Intro - Why this matters */}
+        {/* 🎓 Lab Completed Badge */}
+        <AnimatePresence>
+          {labCompleted && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.9 }}
+              className="mb-8 p-4 bg-gradient-to-r from-emerald-500/10 to-green-500/10 border-2 border-emerald-500/40 rounded-2xl text-center relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1)_0%,transparent_70%)] pointer-events-none" />
+              <div className="flex items-center justify-center gap-2 mb-2 relative z-10">
+                <Trophy className="w-6 h-6 text-emerald-400 animate-bounce" />
+                <span className="text-emerald-300 font-mono text-lg font-bold">
+                  {t.labCompleted}
+                </span>
+                <Trophy className="w-6 h-6 text-emerald-400 animate-bounce" />
+              </div>
+              <p className="text-slate-400 text-sm relative z-10">
+                {t.labCompletedDesc}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Intro */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -538,7 +593,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </p>
         </motion.div>
 
-        {/* Bank vs Bitcoin Comparison */}
+        {/* Bank vs Bitcoin */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -548,56 +603,39 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             <BookOpen className="w-5 h-5 text-orange-400" />
             {t.bankVsBitcoin}
           </h3>
-          
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Bank */}
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5">
               <h4 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
                 <Building2 className="w-5 h-5" />
                 {t.bankTitle}
               </h4>
               <ul className="space-y-3">
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  {t.bankDesc1}
-                </li>
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  {t.bankDesc2}
-                </li>
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  {t.bankDesc3}
-                </li>
+                {[t.bankDesc1, t.bankDesc2, t.bankDesc3].map((desc, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                    <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                    {desc}
+                  </li>
+                ))}
               </ul>
             </div>
-            
-            {/* Bitcoin */}
             <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-5">
               <h4 className="text-lg font-bold text-orange-400 mb-4 flex items-center gap-2">
                 <Wallet className="w-5 h-5" />
                 {t.bitcoinTitle}
               </h4>
               <ul className="space-y-3">
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                  {t.bitcoinDesc1}
-                </li>
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                  {t.bitcoinDesc2}
-                </li>
-                <li className="flex items-start gap-2 text-sm text-slate-300">
-                  <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                  {t.bitcoinDesc3}
-                </li>
+                {[t.bitcoinDesc1, t.bitcoinDesc2, t.bitcoinDesc3].map((desc, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                    <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                    {desc}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
-          
           <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
             <p className="text-amber-400 font-mono text-sm">
-              {lang === 'en' 
+              {lang === 'en'
                 ? '🔓 In Bitcoin, YOU are the bank. Your seed = your keys = your Bitcoin.'
                 : '🔓 En Bitcoin, TÚ eres el banco. Tu semilla = tus claves = tu Bitcoin.'
               }
@@ -605,19 +643,19 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </div>
         </motion.div>
 
-        {/* Critical Warning Banner */}
+        {/* Critical Warning */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-red-500/10 border-2 border-red-500/50 rounded-2xl p-6 mb-8"
+          className="bg-red-500/10 border-2 border-red-500/50 rounded-2xl p-6 mb-8 relative overflow-hidden"
         >
-          <h3 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(239,68,68,0.1)_0%,transparent_70%)] pointer-events-none" />
+          <h3 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2 relative z-10">
             <AlertTriangle className="w-5 h-5 animate-pulse" />
             {t.criticalWarning}
           </h3>
-          <p className="text-sm text-red-300 mb-4">{t.criticalWarningDesc}</p>
-          
-          <div className="grid sm:grid-cols-2 gap-4">
+          <p className="text-sm text-red-300 mb-4 relative z-10">{t.criticalWarningDesc}</p>
+          <div className="grid sm:grid-cols-2 gap-4 relative z-10">
             <div className="space-y-2">
               <p className="text-sm text-slate-400 font-mono">❌ {lang === 'en' ? 'NEVER' : 'NUNCA'}</p>
               <ul className="text-sm space-y-1">
@@ -637,32 +675,30 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </div>
         </motion.div>
 
+        {/* Main Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
+
           {/* Left Panel - Controls */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-1 space-y-6"
           >
-            {/* Word Count Selector */}
+            {/* Word Count */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Dices className="w-5 h-5 text-orange-400" />
                 {t.entropyRandom}
               </h3>
-              
               <div className="flex gap-2 mb-4">
                 {[12, 24].map((count) => (
                   <motion.button
                     key={count}
-                    onClick={() => {
-                      setWordCount(count as 12 | 24);
-                    }}
-                    className={`flex-1 py-3 rounded-xl font-mono text-sm transition-all ${
-                      wordCount === count
+                    onClick={() => setWordCount(count as 12 | 24)}
+                    className={`flex-1 py-3 rounded-xl font-mono text-sm transition-all min-h-[56px] touch-manipulation ${wordCount === count
                         ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                    }`}
+                      }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -670,17 +706,15 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   </motion.button>
                 ))}
               </div>
-              
               <motion.button
                 onClick={generateNewSeed}
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 min-h-[56px] touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <RefreshCw className="w-5 h-5" />
                 {t.regenerate}
               </motion.button>
-              
               {/* Stats */}
               <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                 <div className="bg-slate-800 rounded-lg p-2">
@@ -704,7 +738,6 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 {t.howItWorks}
               </h3>
-              
               <div className="space-y-3">
                 {[
                   { title: t.step1Title, desc: t.step1Desc, icon: Dices },
@@ -714,19 +747,15 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 ].map((step, i) => (
                   <motion.div
                     key={i}
-                    className={`p-3 rounded-xl transition-all ${
-                      i <= activeStep
+                    className={`p-3 rounded-xl transition-all ${i <= activeStep
                         ? 'bg-orange-500/20 border border-orange-500/30'
                         : 'bg-slate-800/50 border border-slate-700'
-                    }`}
-                    animate={{
-                      scale: i === activeStep ? 1.02 : 1,
-                    }}
+                      }`}
+                    animate={{ scale: i === activeStep ? 1.02 : 1 }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono ${
-                        i <= activeStep ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'
-                      }`}>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono ${i <= activeStep ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'
+                        }`}>
                         {i + 1}
                       </span>
                       <step.icon className={`w-4 h-4 ${i <= activeStep ? 'text-orange-400' : 'text-slate-500'}`} />
@@ -739,7 +768,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             </div>
           </motion.div>
 
-          {/* Center Panel - Seed Phrase Display */}
+          {/* Center Panel - Seed Display */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -755,7 +784,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 <div className="flex gap-2">
                   <motion.button
                     onClick={() => setShowSeed(!showSeed)}
-                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors min-h-[44px] min-w-[44px] touch-manipulation"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -764,7 +793,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   <motion.button
                     onClick={copySeed}
                     disabled={!showSeed}
-                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] touch-manipulation"
                     whileHover={{ scale: showSeed ? 1.1 : 1 }}
                     whileTap={{ scale: showSeed ? 0.9 : 1 }}
                   >
@@ -772,8 +801,8 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   </motion.button>
                 </div>
               </div>
-              
-              {/* Warning when hidden */}
+
+              {/* Hidden State */}
               {!showSeed && (
                 <div className="h-64 flex items-center justify-center">
                   <div className="text-center">
@@ -791,17 +820,13 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                         transition={{ duration: 2, repeat: Infinity }}
                       />
                     </div>
-                    <p className="text-slate-400 mt-4 text-sm">
-                      {t.showSeed}
-                    </p>
-                    <p className="text-slate-500 text-xs mt-1">
-                      {lang === 'en' ? '(Make sure no one is watching!)' : '(¡Asegúrate de que nadie esté viendo!)'}
-                    </p>
+                    <p className="text-slate-400 mt-4 text-sm">{t.showSeed}</p>
+                    <p className="text-slate-500 text-xs mt-1">{t.makeSureNoOneWatching}</p>
                   </div>
                 </div>
               )}
-              
-              {/* Seed Words Grid */}
+
+              {/* Seed Words Grid with Cascade Animation */}
               {showSeed && seedWords.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -811,10 +836,10 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   {seedWords.map((word, i) => (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="bg-slate-800 rounded-xl p-3 relative group"
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: i * 0.03 }}
+                      className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-3 relative group border border-slate-700 hover:border-orange-500/50 transition-colors"
                     >
                       <span className="absolute top-1 left-2 text-xs text-slate-600 font-mono">
                         {i + 1}
@@ -822,18 +847,16 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                       <p className="font-mono text-sm text-orange-400 text-center mt-2">
                         {word.word}
                       </p>
-                      
-                      {/* Tooltip with index */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-700 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        <span className="text-slate-400">Index: </span>
-                        <span className="text-orange-400">{word.index}</span>
-                        <span className="text-slate-500 ml-2">({word.binary})</span>
+                      {/* Educational Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 max-w-[180px] shadow-xl border border-orange-500/20">
+                        <p className="text-orange-300 font-mono mb-1">Index: {word.index}</p>
+                        <p className="text-slate-400">{t.glossary11bits}</p>
                       </div>
                     </motion.div>
                   ))}
                 </motion.div>
               )}
-              
+
               {/* Entropy Visualization */}
               {showSeed && showVisualization && (
                 <motion.div
@@ -872,51 +895,46 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 <HelpCircle className="w-5 h-5 text-purple-400" />
                 {t.quiz}
               </h3>
-              
               {!quizStarted && !quizComplete && (
                 <div>
                   <p className="text-sm text-slate-400 mb-4">{t.quizDesc}</p>
                   <motion.button
                     onClick={() => setQuizStarted(true)}
-                    className="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-xl font-medium"
+                    className="w-full bg-purple-500 hover:bg-purple-600 text-white py-4 rounded-xl font-medium min-h-[56px] touch-manipulation"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {lang === 'en' ? 'Start Quiz' : 'Iniciar Quiz'}
+                    {t.startQuiz}
                   </motion.button>
                 </div>
               )}
-              
               {quizStarted && !quizComplete && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-xs text-slate-500">
-                      {lang === 'en' ? 'Question' : 'Pregunta'} {currentQuestion + 1}/{quizQuestions.length}
+                      {t.question} {currentQuestion + 1}/{quizQuestions.length}
                     </span>
                     <span className="text-xs text-purple-400">
-                      {lang === 'en' ? 'Score' : 'Puntuación'}: {score}
+                      {t.score}: {score}
                     </span>
                   </div>
-                  
                   <p className="text-sm text-white mb-4">
                     {quizQuestions[currentQuestion].question}
                   </p>
-                  
                   <div className="space-y-2">
                     {quizQuestions[currentQuestion].options.map((option, i) => (
                       <motion.button
                         key={i}
                         onClick={() => !showResult && handleAnswer(i)}
                         disabled={showResult}
-                        className={`w-full p-3 rounded-xl text-sm text-left transition-all ${
-                          showResult
+                        className={`w-full p-3 rounded-xl text-sm text-left transition-all min-h-[56px] touch-manipulation ${showResult
                             ? i === quizQuestions[currentQuestion].correct
                               ? 'bg-green-500/20 border border-green-500/50 text-green-400'
                               : i === selectedAnswer
                                 ? 'bg-red-500/20 border border-red-500/50 text-red-400'
                                 : 'bg-slate-800 text-slate-500'
                             : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                        }`}
+                          }`}
                         whileHover={!showResult ? { scale: 1.02 } : {}}
                         whileTap={!showResult ? { scale: 0.98 } : {}}
                       >
@@ -924,34 +942,30 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                       </motion.button>
                     ))}
                   </div>
-                  
                   {showResult && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-4"
                     >
-                      <p className={`text-sm mb-4 ${
-                        selectedAnswer === quizQuestions[currentQuestion].correct
+                      <p className={`text-sm mb-4 ${selectedAnswer === quizQuestions[currentQuestion].correct
                           ? 'text-green-400'
                           : 'text-red-400'
-                      }`}>
+                        }`}>
                         {quizQuestions[currentQuestion].explanation}
                       </p>
-                      
                       <motion.button
                         onClick={nextQuestion}
-                        className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-xl text-sm"
+                        className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-xl text-sm min-h-[48px] touch-manipulation"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        {currentQuestion < quizQuestions.length - 1 ? t.quizNext : (lang === 'en' ? 'Complete' : 'Completar')}
+                        {currentQuestion < quizQuestions.length - 1 ? t.quizNext : t.complete}
                       </motion.button>
                     </motion.div>
                   )}
                 </div>
               )}
-              
               {quizComplete && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -967,33 +981,32 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   </motion.div>
                   <p className="text-green-400 font-mono mb-2">{t.quizComplete}</p>
                   <p className="text-slate-400 text-sm mb-4">
-                    {lang === 'en' ? 'Score' : 'Puntuación'}: {score}/{quizQuestions.length}
+                    {t.score}: {score}/{quizQuestions.length}
                   </p>
                   <motion.button
                     onClick={resetQuiz}
-                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm"
+                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm min-h-[48px] touch-manipulation"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {lang === 'en' ? 'Try Again' : 'Intentar de Nuevo'}
+                    {t.tryAgain}
                   </motion.button>
                 </motion.div>
               )}
             </div>
-            
+
             {/* Security Tips */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-green-400" />
                 {t.securityTips}
               </h3>
-              
               <ul className="space-y-3">
                 {[
                   { icon: Lock, text: t.tip1 },
                   { icon: Wallet, text: t.tip2 },
                   { icon: Key, text: t.tip3 },
-                  { icon: Check, text: t.tip4 },
+                  { icon: CheckCircle, text: t.tip4 },
                 ].map((tip, i) => (
                   <motion.li
                     key={i}
@@ -1008,18 +1021,15 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 ))}
               </ul>
             </div>
-            
+
             {/* BIP39 Info */}
             <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 rounded-2xl p-6">
               <h3 className="text-sm font-bold text-orange-400 mb-2 flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                BIP39 Standard
+                {t.bip39Standard}
               </h3>
               <p className="text-xs text-slate-400">
-                {lang === 'en'
-                  ? 'BIP39 defines the standard for mnemonic codes. It uses 2048 carefully selected words from various languages to create human-readable backups of cryptographic keys.'
-                  : 'BIP39 define el estándar para códigos mnemónicos. Usa 2048 palabras cuidadosamente seleccionadas de varios idiomas para crear respaldos legibles de claves criptográficas.'
-                }
+                {t.bip39Desc}
               </p>
             </div>
           </motion.div>
