@@ -3,7 +3,7 @@
 // Components (en orden de aparición en la página~)
 import { HeroSection } from '@/components/hero/HeroSection';
 import { WhyBitcoinForMexico } from '@/components/why-bitcoin/WhyBitcoinForMexico';
-import { ChatInterface } from '@/components/chat/ChatInterface';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 import { MarketSection } from '@/components/markets/MarketSection'; // 💱 BTC/MXN educativo
 import { PartnersCarousel } from '@/components/economies/CircularEconomiesCarousel'; // 🛒 Aureo sponsor
 import { TipJar } from '@/components/tip-jar/TipJar';
@@ -57,7 +57,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
       {/* 🤖 3) CHAT – Interactúa con B.O.B., tu tutor AI */}
       <section id="chat" className="scroll-mt-20">
-        <ChatInterface lang={lang} dict={dict.chat} />
+        <BobChatWidget mode="hero" lang={lang} />
       </section>
 
       {/* 💱 4) MARKET METRICS – BTC/MXN con tooltips educativos */}

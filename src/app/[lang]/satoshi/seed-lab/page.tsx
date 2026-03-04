@@ -10,6 +10,7 @@ import {
   GraduationCap, Trophy, Info
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
 // ============================================================================
 // BIP39 Wordlist (English - first 256 words for demo)
@@ -696,8 +697,8 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                     key={count}
                     onClick={() => setWordCount(count as 12 | 24)}
                     className={`flex-1 py-3 rounded-xl font-mono text-sm transition-all min-h-[56px] touch-manipulation ${wordCount === count
-                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                       }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -748,8 +749,8 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   <motion.div
                     key={i}
                     className={`p-3 rounded-xl transition-all ${i <= activeStep
-                        ? 'bg-orange-500/20 border border-orange-500/30'
-                        : 'bg-slate-800/50 border border-slate-700'
+                      ? 'bg-orange-500/20 border border-orange-500/30'
+                      : 'bg-slate-800/50 border border-slate-700'
                       }`}
                     animate={{ scale: i === activeStep ? 1.02 : 1 }}
                   >
@@ -928,12 +929,12 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                         onClick={() => !showResult && handleAnswer(i)}
                         disabled={showResult}
                         className={`w-full p-3 rounded-xl text-sm text-left transition-all min-h-[56px] touch-manipulation ${showResult
-                            ? i === quizQuestions[currentQuestion].correct
-                              ? 'bg-green-500/20 border border-green-500/50 text-green-400'
-                              : i === selectedAnswer
-                                ? 'bg-red-500/20 border border-red-500/50 text-red-400'
-                                : 'bg-slate-800 text-slate-500'
-                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                          ? i === quizQuestions[currentQuestion].correct
+                            ? 'bg-green-500/20 border border-green-500/50 text-green-400'
+                            : i === selectedAnswer
+                              ? 'bg-red-500/20 border border-red-500/50 text-red-400'
+                              : 'bg-slate-800 text-slate-500'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                           }`}
                         whileHover={!showResult ? { scale: 1.02 } : {}}
                         whileTap={!showResult ? { scale: 0.98 } : {}}
@@ -949,8 +950,8 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                       className="mt-4"
                     >
                       <p className={`text-sm mb-4 ${selectedAnswer === quizQuestions[currentQuestion].correct
-                          ? 'text-green-400'
-                          : 'text-red-400'
+                        ? 'text-green-400'
+                        : 'text-red-400'
                         }`}>
                         {quizQuestions[currentQuestion].explanation}
                       </p>
@@ -1035,6 +1036,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </motion.div>
         </div>
       </div>
+      <BobChatWidget mode="floating" context="seed" lang={lang} />
     </div>
   );
 }

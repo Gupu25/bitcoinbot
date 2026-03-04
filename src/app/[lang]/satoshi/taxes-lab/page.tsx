@@ -9,6 +9,7 @@ import {
     ChevronDown, Info, CheckCircle, XCircle, ArrowRight, Clock,
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 import { TransactionJourney } from './components/TransactionJourney';
 import { CostBasisSimulator } from './components/CostBasisSimulator';
 import { SATChecklist } from './components/SATChecklist';
@@ -451,8 +452,8 @@ export default function TaxesLabPage({ params }: TaxLabProps) {
                             key={step.id}
                             onClick={() => setActiveSection(step.id as 'journey' | 'simulator' | 'checklist')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${activeSection === step.id
-                                    ? 'bg-orange-500 text-black'
-                                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                ? 'bg-orange-500 text-black'
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                                 }`}
                         >
                             <step.icon className="w-4 h-4" />
@@ -574,10 +575,10 @@ export default function TaxesLabPage({ params }: TaxLabProps) {
                                         <td className="py-3">
                                             <span
                                                 className={`px-2 py-1 rounded text-xs flex items-center gap-1 w-fit ${tx.status === 'confirmed'
-                                                        ? 'bg-green-500/20 text-green-400'
-                                                        : tx.status === 'pending'
-                                                            ? 'bg-yellow-500/20 text-yellow-400'
-                                                            : 'bg-red-500/20 text-red-400'
+                                                    ? 'bg-green-500/20 text-green-400'
+                                                    : tx.status === 'pending'
+                                                        ? 'bg-yellow-500/20 text-yellow-400'
+                                                        : 'bg-red-500/20 text-red-400'
                                                     }`}
                                             >
                                                 {tx.status === 'confirmed' ? '🟢' : tx.status === 'pending' ? '🟡' : '🔴'}
@@ -655,7 +656,7 @@ export default function TaxesLabPage({ params }: TaxLabProps) {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
+                <BobChatWidget mode="floating" context="taxes" lang={lang} />
             </div>
         </div>
     );

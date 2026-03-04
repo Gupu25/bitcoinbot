@@ -8,6 +8,7 @@ import {
     Copy, Check, RefreshCw,
     Users, Bug, HelpCircle, ChevronDown,
 } from 'lucide-react';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
 // ============================================================================
 // TYPES
@@ -218,11 +219,11 @@ export function SigningLabClient({ t, lang }: Props) {
                                 setExposedKey(null);
                             }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all ${activeTab === tab.id
-                                    ? tab.id === 'ecdsa' ? 'bg-blue-500 text-white shadow-lg'
-                                        : tab.id === 'schnorr' ? 'bg-amber-500 text-white shadow-lg'
-                                            : tab.id === 'musig' ? 'bg-purple-500 text-white shadow-lg'
-                                                : 'bg-red-500 text-white shadow-lg'
-                                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                                ? tab.id === 'ecdsa' ? 'bg-blue-500 text-white shadow-lg'
+                                    : tab.id === 'schnorr' ? 'bg-amber-500 text-white shadow-lg'
+                                        : tab.id === 'musig' ? 'bg-purple-500 text-white shadow-lg'
+                                            : 'bg-red-500 text-white shadow-lg'
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                                 }`}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -326,8 +327,8 @@ export function SigningLabClient({ t, lang }: Props) {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         className={`mt-4 p-3 rounded-xl text-center font-medium text-sm ${verificationResult
-                                                ? 'bg-green-500/20 border border-green-500/50 text-green-400'
-                                                : 'bg-red-500/20 border border-red-500/50 text-red-400'
+                                            ? 'bg-green-500/20 border border-green-500/50 text-green-400'
+                                            : 'bg-red-500/20 border border-red-500/50 text-red-400'
                                             }`}
                                     >
                                         {verificationResult ? t.valid : t.invalid}
@@ -473,6 +474,7 @@ export function SigningLabClient({ t, lang }: Props) {
                     </motion.div>
                 </div>
             </div>
+            <BobChatWidget mode="floating" context="signing" lang={lang} />
         </div>
     );
 }

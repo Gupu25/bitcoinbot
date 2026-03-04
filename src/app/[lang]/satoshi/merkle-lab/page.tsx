@@ -10,6 +10,7 @@ import {
   GitBranch, Layers, Target, RefreshCw
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -770,6 +771,7 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
           </motion.div>
         </div>
       </div>
+      <BobChatWidget mode="floating" context="merkle" lang={lang} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -335,6 +336,7 @@ export default function MiningLabPage({ params }: { params: { lang: 'en' | 'es' 
 
         const mineBatch = () => {
             const batchSize = 100;
+            let batchBestDifficulty = 0;
 
             for (let i = 0; i < batchSize; i++) {
                 if (abortRef.current) return;
@@ -342,6 +344,11 @@ export default function MiningLabPage({ params }: { params: { lang: 'en' | 'es' 
                 const message = `bitcoin-agent-hackathon-${Date.now()}-${nonce}`;
                 const hash = simulateHash(message);
                 attempts++;
+
+                const currentDiff = countLeadingZeros(hash);
+                if (currentDiff > batchBestDifficulty) {
+                    batchBestDifficulty = currentDiff;
+                }
 
                 if (hash.startsWith(targetPrefix)) {
                     setResult({
@@ -360,12 +367,12 @@ export default function MiningLabPage({ params }: { params: { lang: 'en' | 'es' 
 
             // Update stats
             const elapsed = (Date.now() - startTime) / 1000;
-            setStats({
+            setStats(prev => ({
                 attempts,
                 startTime,
                 currentHashrate: Math.floor(attempts / elapsed) || 0,
-                bestDifficulty: Math.max(stats.bestDifficulty, countLeadingZeros(hash)),
-            });
+                bestDifficulty: Math.max(prev.bestDifficulty, batchBestDifficulty),
+            }));
 
             // Continue mining
             setTimeout(mineBatch, 0);
@@ -803,6 +810,7 @@ export default function MiningLabPage({ params }: { params: { lang: 'en' | 'es' 
                     </motion.div>
                 </div>
             </div>
+            <BobChatWidget mode="floating" context="mining" lang={lang} />
         </div>
     );
 }
