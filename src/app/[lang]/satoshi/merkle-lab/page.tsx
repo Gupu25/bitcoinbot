@@ -13,6 +13,14 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
 // ============================================================================
+// DEMO DATA - Friendly transactions for users without Bitcoin knowledge
+// ============================================================================
+const DEMO_TRANSACTIONS = [
+  '504a72525a81ba74c8b3c2bb0481a0248c1eb780996d4976e49fc2225fbcc030',
+  '0e5a04092081a63582eb8edac760e66890a72eea9a4cc53aa5e6188cb44b0341',
+];
+
+// ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 interface MerkleNode {
@@ -37,6 +45,7 @@ interface Translations {
   whyImportant: string;
   whyImportantDesc: string;
   addTx: string;
+  loadDemo: string;
   clearAll: string;
   transactions: string;
   merkleRoot: string;
@@ -105,6 +114,7 @@ const translations: Record<'en' | 'es', Translations> = {
     whyImportant: 'Why does this matter?',
     whyImportantDesc: 'Merkle Trees let you verify a single transaction without downloading 500GB+ of blockchain. This is how lightweight wallets like Electrum work!',
     addTx: 'Add Transaction',
+    loadDemo: 'Load Demo',
     clearAll: 'Clear All',
     transactions: 'Transactions (Leaves)',
     merkleRoot: 'Merkle Root',
@@ -171,6 +181,7 @@ const translations: Record<'en' | 'es', Translations> = {
     whyImportant: '¿Por qué importa esto?',
     whyImportantDesc: 'Los Árboles Merkle te permiten verificar una sola transacción sin descargar 500GB+ de blockchain. ¡Así funcionan wallets ligeras como Electrum!',
     addTx: 'Añadir Transacción',
+    loadDemo: 'Cargar Demo',
     clearAll: 'Limpiar Todo',
     transactions: 'Transacciones (Hojas)',
     merkleRoot: 'Raíz Merkle',
@@ -380,10 +391,7 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
   const lang = params.lang || 'en';
   const t = translations[lang];
 
-  const [transactions, setTransactions] = useState<string[]>([
-    'tx_alice_bob_001',
-    'tx_carol_dave_002',
-  ]);
+  const [transactions, setTransactions] = useState<string[]>([]);
   const [newTx, setNewTx] = useState('');
   const [selectedNode, setSelectedNode] = useState<MerkleNode | null>(null);
   const [proof, setProof] = useState<ProofStep[] | null>(null);
@@ -420,6 +428,12 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
 
   const removeTransaction = (index: number) => {
     setTransactions(transactions.filter((_, i) => i !== index));
+    setSelectedNode(null);
+    setProof(null);
+  };
+
+  const loadDemoTransactions = () => {
+    setTransactions([...DEMO_TRANSACTIONS]);
     setSelectedNode(null);
     setProof(null);
   };
@@ -525,10 +539,16 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
                   <Plus className="w-5 h-5" />
                 </motion.button>
               </div>
-              <button onClick={() => { setTransactions([]); setSelectedNode(null); setProof(null); }} className="mt-3 text-sm text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
-                <Trash2 className="w-4 h-4" />
-                {t.clearAll}
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <motion.button onClick={loadDemoTransactions} className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Sparkles className="w-4 h-4" />
+                  {t.loadDemo}
+                </motion.button>
+                <button onClick={() => { setTransactions([]); setSelectedNode(null); setProof(null); }} className="text-sm text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
+                  <Trash2 className="w-4 h-4" />
+                  {t.clearAll}
+                </button>
+              </div>
             </div>
 
             {/* Transaction List */}
