@@ -142,6 +142,7 @@
     "builtBy": "Built by"
   },
   "hiddenMenu": {
+    "home": "Home",
     "about": "About Us",
     "labSection": "Labs",
     "labs": {

@@ -5,14 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Menu, X, Info, Zap, Terminal, TreeDeciduous, Key,
     Fingerprint, ExternalLink, GraduationCap, Cpu,
-    FileText, Star, Lock
+    FileText, Star, Lock, Home
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface HiddenMenuProps {
     lang: 'en' | 'es';
     dict?: {
+        home: string;
         about: string;
         labSection: string;
         labs: {
@@ -43,6 +44,7 @@ interface HiddenMenuProps {
 // 🐱 Fallback translations if dict not provided
 const fallbackTranslations = {
     en: {
+        home: 'Home',
         about: 'About Us',
         labSection: 'Labs',
         labs: {
@@ -69,6 +71,7 @@ const fallbackTranslations = {
         recommended: '⭐ Recommended first',
     },
     es: {
+        home: 'Inicio',
         about: 'Sobre Nosotros',
         labSection: 'Laboratorios',
         labs: {
@@ -113,6 +116,7 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
     const [mounted, setMounted] = useState(false);
     const [reducedMotion, setReducedMotion] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
 
     const t = dict || fallbackTranslations[lang];
 
@@ -333,13 +337,31 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                            {/* Home Link */}
+                            <div className="mb-3">
+                                <Link
+                                    href={`/${lang}`}
+                                    className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                   transition-colors active:scale-[0.98] border
+                   ${pathname === `/${lang}` || pathname === `/${lang}/`
+                                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
+                                        : 'border-transparent text-slate-300 hover:text-[#f7931a] hover:bg-slate-900'}`}
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <Home className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" aria-hidden="true" />
+                                    <span className="font-mono text-sm">{t.home}</span>
+                                </Link>
+                            </div>
+
                             {/* About Link */}
                             <div className="mb-6 sm:mb-8">
                                 <Link
                                     href={`/${lang}/about`}
-                                    className="flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
-                   text-slate-300 hover:text-[#f7931a] hover:bg-slate-900 
-                   transition-colors active:scale-[0.98]"
+                                    className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                   transition-colors active:scale-[0.98] border
+                   ${pathname?.startsWith(`/${lang}/about`)
+                                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
+                                        : 'border-transparent text-slate-300 hover:text-[#f7931a] hover:bg-slate-900'}`}
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <Info className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" aria-hidden="true" />
@@ -362,6 +384,8 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                                     {menuItems.map((item, index) => {
                                         const style = difficultyStyles[item.difficulty];
                                         const Icon = item.icon;
+                                        const fullPath = `/${lang}${item.path}`;
+                                        const isActive = pathname === fullPath || pathname?.startsWith(`${fullPath}/`);
 
                                         return (
                                             <motion.button
@@ -375,7 +399,7 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                            text-slate-400 hover:text-[#f7931a] hover:bg-slate-900 
                            transition-colors text-left group active:scale-[0.98]
                            border border-transparent hover:border-[#f7931a]/20
-                           ${item.recommended ? 'bg-emerald-500/5 border-emerald-500/20' : ''}`}
+                           ${isActive ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-300' : ''}`}
                                                 title={`${item.title} (Ctrl+Click to open in new tab)`}
                                             >
                                                 {/* Difficulty dot */}
@@ -383,10 +407,10 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
 
                                                 {/* Icon */}
                                                 <div className={`p-2 rounded-lg flex-shrink-0 
-                            ${item.recommended ? 'bg-emerald-500/20' : 'bg-slate-900'}
+                            ${isActive ? 'bg-emerald-500/20' : 'bg-slate-900'}
                             group-hover:bg-slate-800 transition-colors`}>
                                                     <Icon className={`w-4 h-4 sm:w-5 sm:h-5 
-                            ${item.recommended ? 'text-emerald-400' : 'text-slate-500 group-hover:text-[#f7931a]'} 
+                            ${isActive ? 'text-emerald-400' : 'text-slate-500 group-hover:text-[#f7931a]'} 
                             transition-colors`}
                                                         aria-hidden="true"
                                                     />
@@ -395,10 +419,10 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                                                 {/* Content */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className={`font-mono text-xs sm:text-sm ${item.recommended ? 'text-emerald-300 font-semibold' : ''}`}>
+                                                        <span className={`font-mono text-xs sm:text-sm ${isActive ? 'text-emerald-300 font-semibold' : ''}`}>
                                                             {item.title}
                                                         </span>
-                                                        {item.recommended && (
+                                                        {item.recommended && !isActive && (
                                                             <span className="text-[10px] text-emerald-400">⭐</span>
                                                         )}
                                                     </div>

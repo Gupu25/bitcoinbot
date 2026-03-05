@@ -149,6 +149,7 @@
     "serverError": "Error del servidor. Por favor intenta más tarde."
   },
   "hiddenMenu": {
+    "home": "Inicio",
     "about": "Sobre Nosotros",
     "labSection": "Laboratorios",
     "labs": {
