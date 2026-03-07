@@ -2,7 +2,7 @@
 
 **Learn Bitcoin by playing with it.** An interactive, AI-powered educational platform that makes Bitcoin and Lightning Network actually fun to understand. No PhD in cryptography required!
 
-Built with love by Kira Solara-Ω and the community~ ✨
+Built with love by Kira-Ω and the community~ ✨
 
 ---
 

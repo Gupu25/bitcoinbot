@@ -5,62 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dices, Shield, AlertTriangle, Key, Eye, EyeOff,
   Copy, Check, RefreshCw, BookOpen, Sparkles,
-  Lock, Unlock, Trash2, Zap, FileText, Fingerprint,
-  Wallet, Building2, XCircle, CheckCircle, HelpCircle,
-  GraduationCap, Trophy, Info
+  Lock, Wallet, Building2, XCircle, CheckCircle, HelpCircle,
+  Trophy, FileText
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { BobChatWidget } from '@/components/chat/BobChatWidget';
 
-// ============================================================================
-// BIP39 Wordlist (English - first 256 words for demo)
-// ============================================================================
-const BIP39_WORDS = [
-  'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract',
-  'absurd', 'abuse', 'access', 'accident', 'account', 'accuse', 'achieve', 'acid',
-  'acoustic', 'acquire', 'across', 'act', 'action', 'actor', 'actress', 'actual',
-  'adapt', 'add', 'addict', 'address', 'adjust', 'admit', 'adult', 'advance',
-  'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
-  'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album',
-  'alcohol', 'alert', 'alien', 'all', 'alley', 'allow', 'almost', 'alone',
-  'alpha', 'already', 'also', 'alter', 'always', 'amateur', 'amazing', 'among',
-  'amount', 'amused', 'analyst', 'anchor', 'ancient', 'anger', 'angle', 'angry',
-  'animal', 'ankle', 'announce', 'annual', 'another', 'answer', 'antenna', 'antique',
-  'anxiety', 'any', 'apart', 'apology', 'appear', 'apple', 'approve', 'april',
-  'arch', 'arctic', 'area', 'arena', 'argue', 'arm', 'armed', 'armor',
-  'army', 'around', 'arrange', 'arrest', 'arrive', 'arrow', 'art', 'artefact',
-  'artist', 'artwork', 'ask', 'aspect', 'assault', 'asset', 'assist', 'assume',
-  'asthma', 'athlete', 'atom', 'attack', 'attend', 'attitude', 'attract', 'auction',
-  'audit', 'august', 'aunt', 'author', 'auto', 'autumn', 'average', 'avocado',
-  'avoid', 'awake', 'aware', 'away', 'awesome', 'awful', 'awkward', 'axis',
-  'baby', 'bachelor', 'bacon', 'badge', 'bag', 'balance', 'balcony', 'ball',
-  'bamboo', 'banana', 'banner', 'bar', 'barely', 'bargain', 'barrel', 'base',
-  'basic', 'basket', 'battle', 'beach', 'bean', 'beauty', 'because', 'become',
-  'beef', 'before', 'begin', 'behave', 'behind', 'believe', 'below', 'belt',
-  'bench', 'benefit', 'best', 'betray', 'better', 'between', 'beyond', 'bicycle',
-  'bid', 'bike', 'bind', 'biology', 'bird', 'birth', 'bitter', 'black',
-  'blade', 'blame', 'blanket', 'blast', 'bleak', 'bless', 'blind', 'blood',
-  'blossom', 'blouse', 'blue', 'blur', 'blush', 'board', 'boat', 'body',
-  'boil', 'bomb', 'bone', 'bonus', 'book', 'boost', 'border', 'boring',
-  'borrow', 'boss', 'bottom', 'bounce', 'box', 'boy', 'bracket', 'brain',
-  'brand', 'brass', 'brave', 'bread', 'breeze', 'brick', 'bridge', 'brief',
-  'bright', 'bring', 'brisk', 'broccoli', 'broken', 'bronze', 'broom', 'brother',
-  'brown', 'brush', 'bubble', 'buddy', 'budget', 'buffalo', 'build', 'bulb',
-  'bulk', 'bullet', 'bundle', 'bunker', 'burden', 'burger', 'burst', 'bus',
-  'business', 'busy', 'butter', 'buyer', 'buzz', 'cabbage', 'cabin', 'cable',
-  'cactus', 'cage', 'cake', 'call', 'calm', 'camera', 'camp', 'canal',
-  'candy', 'cannon', 'canoe', 'canvas', 'canyon', 'capable', 'capital', 'captain',
-  'car', 'carbon', 'card', 'cargo', 'carpet', 'carry', 'cart', 'case',
-  'cash', 'casino', 'castle', 'casual', 'cat', 'catalog', 'catch', 'category'
-];
-
-const getWord = (index: number): string => {
-  const wordIndex = index % 2048;
-  if (wordIndex < BIP39_WORDS.length) {
-    return BIP39_WORDS[wordIndex];
-  }
-  return `word${wordIndex}`;
-};
+// ✅ IMPORTS CORREGIDOS PARA @scure/bip39 v1.4.0
+import { generateMnemonic, mnemonicToEntropy, entropyToMnemonic, validateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 // ============================================================================
 // Translations - 🇲🇽 Spanish-First Microcopy para Mexicanos
@@ -325,32 +280,8 @@ const translations: Record<'en' | 'es', Translations> = {
 };
 
 // ============================================================================
-// Helper Functions
+// Types & Helpers - CORREGIDOS CON @scure/bip39 v1.4.0
 // ============================================================================
-function generateEntropy(bits: 128 | 256): string {
-  const bytes = bits / 8;
-  const array = new Uint8Array(bytes);
-  if (typeof window !== 'undefined' && window.crypto) {
-    window.crypto.getRandomValues(array);
-  } else {
-    for (let i = 0; i < array.length; i++) {
-      array[i] = Math.floor(Math.random() * 256);
-    }
-  }
-  return Array.from(array)
-    .map(b => b.toString(2).padStart(8, '0'))
-    .join('');
-}
-
-function calculateChecksum(entropy: string): string {
-  let hash = 0n;
-  for (let i = 0; i < entropy.length; i++) {
-    hash = ((hash << 5n) - hash) + BigInt(entropy[i] === '1' ? 1 : 0);
-    hash = hash & ((1n << 256n) - 1n);
-  }
-  const checksumLength = entropy.length / 32;
-  return hash.toString(2).padStart(256, '0').slice(0, checksumLength);
-}
 
 interface SeedWord {
   word: string;
@@ -359,25 +290,63 @@ interface SeedWord {
   entropyBits: string;
 }
 
-function entropyToSeedPhrase(entropy: string): SeedWord[] {
-  const checksum = calculateChecksum(entropy);
-  const combined = entropy + checksum;
-  const words: SeedWord[] = [];
-  for (let i = 0; i < combined.length; i += 11) {
-    const chunk = combined.slice(i, i + 11);
-    if (chunk.length === 11) {
-      const index = parseInt(chunk, 2);
-      words.push({
-        word: getWord(index),
-        index,
-        binary: chunk,
-        entropyBits: chunk.slice(0, 8),
-      });
-    }
-  }
-  return words;
+// ✅ Convertir mnemonic a SeedWord[] para visualización educativa
+function mnemonicToSeedWords(mnemonic: string): SeedWord[] {
+  const words = mnemonic.split(' ');
+  const seedWords: SeedWord[] = [];
+  
+  // Obtener entropía del mnemonic usando la wordlist
+  const entropyBytes = mnemonicToEntropy(mnemonic, wordlist);
+  const entropyBinary = Array.from(entropyBytes)
+    .map(b => b.toString(2).padStart(8, '0'))
+    .join('');
+  
+  // Calcular checksum real con SHA256 (BIP39 estándar)
+  const checksum = calculateChecksum(entropyBinary);
+  const combined = entropyBinary + checksum;
+  
+  // Mapear cada palabra a su índice y bits usando la wordlist
+  words.forEach((word, i) => {
+    const index = wordlist.indexOf(word);
+    const chunk = combined.slice(i * 11, (i + 1) * 11);
+    
+    seedWords.push({
+      word,
+      index,
+      binary: chunk,
+      entropyBits: chunk.slice(0, 8),
+    });
+  });
+  
+  return seedWords;
 }
 
+// ✅ Calcular checksum con SHA256 REAL (BIP39 estándar)
+function calculateChecksum(entropy: string): string {
+  const entropyBytes = new Uint8Array(entropy.length / 8);
+  for (let i = 0; i < entropy.length; i += 8) {
+    entropyBytes[i / 8] = parseInt(entropy.slice(i, i + 8), 2);
+  }
+  
+  const hash = sha256(entropyBytes);
+  
+  const hashBinary = Array.from(hash as Uint8Array)
+    .map(b => b.toString(2).padStart(8, '0'))
+    .join('');
+  
+  const checksumLength = entropy.length / 32; // 128 bits = 4, 256 bits = 8
+  return hashBinary.slice(0, checksumLength);
+}
+
+// ✅ Generar mnemonic válido usando @scure/bip39 con wordlist
+function generateValidMnemonic(wordCount: 12 | 24): string {
+  const strength = wordCount === 12 ? 128 : 256;
+  return generateMnemonic(wordlist, strength);
+}
+
+// ============================================================================
+// Quiz Questions
+// ============================================================================
 interface QuizQuestion {
   question: string;
   options: string[];
@@ -437,12 +406,14 @@ const getQuizQuestions = (lang: 'en' | 'es'): QuizQuestion[] => [
 ];
 
 // ============================================================================
-// Main Component
+// Main Component - SeedLabPage
 // ============================================================================
 export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } }) {
   const lang = params.lang || 'en';
   const t = translations[lang];
+  
   const [wordCount, setWordCount] = useState<12 | 24>(12);
+  const [mnemonic, setMnemonic] = useState<string>('');
   const [entropy, setEntropy] = useState<string>('');
   const [seedWords, setSeedWords] = useState<SeedWord[]>([]);
   const [showSeed, setShowSeed] = useState(false);
@@ -450,7 +421,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
   const [activeStep, setActiveStep] = useState(0);
   const [showVisualization, setShowVisualization] = useState(true);
   const [labCompleted, setLabCompleted] = useState(false);
-
+  
   // Quiz state
   const [quizStarted, setQuizStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -458,34 +429,59 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
+  
   const quizQuestions = getQuizQuestions(lang);
-
+  
+  // ✅ SOLUCIÓN 1: Mostrar semilla inmediatamente al generar
   const generateNewSeed = useCallback(() => {
-    // 🔐 Confirm before regenerating if seed is visible
-    if (showSeed && seedWords.length > 0) {
-      const confirmed = window.confirm(t.regenerateConfirm);
-      if (!confirmed) return;
+    console.log('🔄 generateNewSeed iniciado');
+    try {
+      // 🔐 Confirm before regenerating if seed is visible
+      if (showSeed && seedWords.length > 0) {
+        const confirmed = window.confirm(t.regenerateConfirm);
+        if (!confirmed) return;
+      }
+      
+      // Generar mnemonic válido con @scure/bip39 usando wordlist
+      const newMnemonic = generateValidMnemonic(wordCount);
+      console.log('✅ Mnemónico generado:', newMnemonic);
+      
+      setMnemonic(newMnemonic);
+      
+      // Convertir a SeedWords para visualización
+      const words = mnemonicToSeedWords(newMnemonic);
+      console.log('✅ Palabras convertidas:', words.length);
+      
+      setSeedWords(words);
+      
+      // ✅ MOSTRAR SEMILLA INMEDIATAMENTE (Solución 1!)
+      setShowSeed(true);
+      
+      // Calcular entropía para visualización usando wordlist
+      const entropyBytes = mnemonicToEntropy(newMnemonic, wordlist);
+      const entropyBinary = Array.from(entropyBytes)
+        .map(b => b.toString(2).padStart(8, '0'))
+        .join('');
+      setEntropy(entropyBinary);
+      
+      setActiveStep(0);
+      setCopied(false);
+    } catch (error) {
+      console.error('❌ ERROR en generateNewSeed:', error);
     }
-    const bits = wordCount === 12 ? 128 : 256;
-    const newEntropy = generateEntropy(bits);
-    setEntropy(newEntropy);
-    setSeedWords(entropyToSeedPhrase(newEntropy));
-    setShowSeed(false);
-    setActiveStep(0);
-    setCopied(false);
   }, [wordCount, showSeed, seedWords.length, t.regenerateConfirm]);
-
+  
+  // Generar semilla inicial al montar componente
   useEffect(() => {
     generateNewSeed();
-  }, [generateNewSeed]);
-
+  }, []); // Solo al inicio
+  
   const copySeed = async () => {
-    const phrase = seedWords.map(w => w.word).join(' ');
-    await navigator.clipboard.writeText(phrase);
+    await navigator.clipboard.writeText(mnemonic);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
+  
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
     setShowResult(true);
@@ -493,7 +489,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
       setScore(score + 1);
     }
   };
-
+  
   const nextQuestion = () => {
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -504,7 +500,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
       setLabCompleted(true); // 🎓 Mark lab as completed!
     }
   };
-
+  
   const resetQuiz = () => {
     setQuizStarted(false);
     setCurrentQuestion(0);
@@ -513,7 +509,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
     setScore(0);
     setQuizComplete(false);
   };
-
+  
   useEffect(() => {
     if (entropy) {
       const interval = setInterval(() => {
@@ -522,15 +518,14 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
       return () => clearInterval(interval);
     }
   }, [entropy]);
-
+  
   const checksum = entropy ? calculateChecksum(entropy) : '';
   const totalBits = wordCount === 12 ? 128 : 256;
   const checksumBits = wordCount === 12 ? 4 : 8;
-
+  
   return (
     <div className="min-h-screen bg-slate-950 text-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -554,7 +549,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             {t.subtitle}
           </p>
         </motion.div>
-
+        
         {/* 🎓 Lab Completed Badge */}
         <AnimatePresence>
           {labCompleted && (
@@ -578,7 +573,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             </motion.div>
           )}
         </AnimatePresence>
-
+        
         {/* Intro */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -593,7 +588,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             {t.introText}
           </p>
         </motion.div>
-
+        
         {/* Bank vs Bitcoin */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -643,7 +638,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             </p>
           </div>
         </motion.div>
-
+        
         {/* Critical Warning */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -675,10 +670,9 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             </div>
           </div>
         </motion.div>
-
+        
         {/* Main Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-
           {/* Left Panel - Controls */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -696,10 +690,11 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   <motion.button
                     key={count}
                     onClick={() => setWordCount(count as 12 | 24)}
-                    className={`flex-1 py-3 rounded-xl font-mono text-sm transition-all min-h-[56px] touch-manipulation ${wordCount === count
-                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                      }`}
+                    className={`flex-1 py-3 rounded-xl font-mono text-sm transition-all min-h-[56px] touch-manipulation ${
+                      wordCount === count
+                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -716,6 +711,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 <RefreshCw className="w-5 h-5" />
                 {t.regenerate}
               </motion.button>
+              
               {/* Stats */}
               <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                 <div className="bg-slate-800 rounded-lg p-2">
@@ -732,7 +728,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 </div>
               </div>
             </div>
-
+            
             {/* How It Works */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -748,18 +744,22 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 ].map((step, i) => (
                   <motion.div
                     key={i}
-                    className={`p-3 rounded-xl transition-all ${i <= activeStep
-                      ? 'bg-orange-500/20 border border-orange-500/30'
-                      : 'bg-slate-800/50 border border-slate-700'
-                      }`}
+                    className={`p-3 rounded-xl transition-all ${
+                      i <= activeStep
+                        ? 'bg-orange-500/20 border border-orange-500/30'
+                        : 'bg-slate-800/50 border border-slate-700'
+                    }`}
                     animate={{ scale: i === activeStep ? 1.02 : 1 }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono ${i <= activeStep ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'
-                        }`}>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono ${
+                        i <= activeStep ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'
+                      }`}>
                         {i + 1}
                       </span>
-                      <step.icon className={`w-4 h-4 ${i <= activeStep ? 'text-orange-400' : 'text-slate-500'}`} />
+                      <step.icon className={`w-4 h-4 ${
+                        i <= activeStep ? 'text-orange-400' : 'text-slate-500'
+                      }`} />
                       <span className="font-mono text-sm text-white">{step.title}</span>
                     </div>
                     <p className="text-xs text-slate-400 pl-8">{step.desc}</p>
@@ -768,7 +768,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
               </div>
             </div>
           </motion.div>
-
+          
           {/* Center Panel - Seed Display */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -778,7 +778,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 min-h-[500px]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-orange-400" />
+                  <Key className="w-5 h-5 text-orange-400" />
                   {t.yourSeed}
                   <InfoTooltip content={t.glossarySeedPhrase} />
                 </h3>
@@ -802,33 +802,9 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   </motion.button>
                 </div>
               </div>
-
-              {/* Hidden State */}
-              {!showSeed && (
-                <div className="h-64 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="relative">
-                      <motion.div
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-full"
-                      >
-                        <Lock className="w-8 h-8 text-orange-400" />
-                      </motion.div>
-                      <motion.div
-                        className="absolute inset-0 border-2 border-orange-400/30 rounded-full"
-                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                    </div>
-                    <p className="text-slate-400 mt-4 text-sm">{t.showSeed}</p>
-                    <p className="text-slate-500 text-xs mt-1">{t.makeSureNoOneWatching}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Seed Words Grid with Cascade Animation */}
-              {showSeed && seedWords.length > 0 && (
+              
+              {/* Seed Words Grid - AHORA SIEMPRE VISIBLE SI EXISTEN */}
+              {seedWords.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -848,6 +824,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                       <p className="font-mono text-sm text-orange-400 text-center mt-2">
                         {word.word}
                       </p>
+                      
                       {/* Educational Tooltip */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 max-w-[180px] shadow-xl border border-orange-500/20">
                         <p className="text-orange-300 font-mono mb-1">Index: {word.index}</p>
@@ -857,9 +834,25 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   ))}
                 </motion.div>
               )}
-
+              
+              {/* Mensaje si no hay semilla */}
+              {seedWords.length === 0 && (
+                <div className="h-64 flex items-center justify-center">
+                  <div className="text-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-full mb-4"
+                    >
+                      <Dices className="w-8 h-8 text-orange-400" />
+                    </motion.div>
+                    <p className="text-slate-400 text-sm">Click "Generate New Seed" to start</p>
+                  </div>
+                </div>
+              )}
+              
               {/* Entropy Visualization */}
-              {showSeed && showVisualization && (
+              {showVisualization && entropy && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -883,7 +876,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
               )}
             </div>
           </motion.div>
-
+          
           {/* Right Panel - Quiz & Tips */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -909,6 +902,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   </motion.button>
                 </div>
               )}
+              
               {quizStarted && !quizComplete && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
@@ -928,14 +922,15 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                         key={i}
                         onClick={() => !showResult && handleAnswer(i)}
                         disabled={showResult}
-                        className={`w-full p-3 rounded-xl text-sm text-left transition-all min-h-[56px] touch-manipulation ${showResult
-                          ? i === quizQuestions[currentQuestion].correct
-                            ? 'bg-green-500/20 border border-green-500/50 text-green-400'
-                            : i === selectedAnswer
+                        className={`w-full p-3 rounded-xl text-sm text-left transition-all min-h-[56px] touch-manipulation ${
+                          showResult
+                            ? i === quizQuestions[currentQuestion].correct
+                              ? 'bg-green-500/20 border border-green-500/50 text-green-400'
+                              : i === selectedAnswer
                               ? 'bg-red-500/20 border border-red-500/50 text-red-400'
                               : 'bg-slate-800 text-slate-500'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                          }`}
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                        }`}
                         whileHover={!showResult ? { scale: 1.02 } : {}}
                         whileTap={!showResult ? { scale: 0.98 } : {}}
                       >
@@ -949,10 +944,11 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-4"
                     >
-                      <p className={`text-sm mb-4 ${selectedAnswer === quizQuestions[currentQuestion].correct
-                        ? 'text-green-400'
-                        : 'text-red-400'
-                        }`}>
+                      <p className={`text-sm mb-4 ${
+                        selectedAnswer === quizQuestions[currentQuestion].correct
+                          ? 'text-green-400'
+                          : 'text-red-400'
+                      }`}>
                         {quizQuestions[currentQuestion].explanation}
                       </p>
                       <motion.button
@@ -967,6 +963,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                   )}
                 </div>
               )}
+              
               {quizComplete && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -995,7 +992,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 </motion.div>
               )}
             </div>
-
+            
             {/* Security Tips */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -1022,7 +1019,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
                 ))}
               </ul>
             </div>
-
+            
             {/* BIP39 Info */}
             <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 rounded-2xl p-6">
               <h3 className="text-sm font-bold text-orange-400 mb-2 flex items-center gap-2">
@@ -1036,6 +1033,7 @@ export default function SeedLabPage({ params }: { params: { lang: 'en' | 'es' } 
           </motion.div>
         </div>
       </div>
+      
       <BobChatWidget mode="floating" context="seed" lang={lang} />
     </div>
   );
