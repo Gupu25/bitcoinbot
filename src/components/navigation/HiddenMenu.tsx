@@ -445,6 +445,55 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                                     })}
                                 </nav>
                             </div>
+
+                            {/* Developer Tools */}
+                            <div className="mb-6">
+                                <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
+                                    {t.adminZone}
+                                </p>
+                                <nav className="space-y-1">
+                                    {devItems.map((item) => (
+                                        <button
+                                            key={item.title}
+                                            onClick={(e) => handleAdminClick(item.path)}
+                                            onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                               text-slate-400 hover:text-[#f7931a] hover:bg-slate-900 
+                               transition-colors text-left group active:scale-[0.98]"
+                                            title={`${item.title} (Ctrl+Click to open in new tab)`}
+                                        >
+                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                                            <span className="font-mono text-xs sm:text-sm">{item.title}</span>
+                                            <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+
+                            {/* Admin Section */}
+                            <div>
+                                <p className="text-[10px] sm:text-xs text-red-500/80 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
+                                    {t.complianceZone}
+                                </p>
+                                <nav className="space-y-1">
+                                    {adminItems.map((item) => (
+                                        <button
+                                            key={item.title}
+                                            onClick={(e) => handleAdminClick(item.path)}
+                                            onAuxClick={(e) => handleAdminAuxClick(e, item.path)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl 
+                               text-slate-400 hover:text-red-400 hover:bg-slate-900 
+                               transition-colors text-left group active:scale-[0.98]
+                               border border-red-500/20"
+                                            title={`${item.title} (Ctrl+Click to open in new tab)`}
+                                        >
+                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:scale-110 transition-transform text-red-400/70" aria-hidden="true" />
+                                            <span className="font-mono text-xs sm:text-sm">{item.title}</span>
+                                            <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
                         </div>
 
                         {/* Footer */}
