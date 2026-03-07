@@ -447,6 +447,7 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                             </div>
 
                             {/* Developer Tools */}
+                            {/*
                             <div className="mb-6">
                                 <p className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
                                     {t.adminZone}
@@ -469,8 +470,9 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                                     ))}
                                 </nav>
                             </div>
-
+                            */}
                             {/* Admin Section */}
+                            {/*
                             <div>
                                 <p className="text-[10px] sm:text-xs text-red-500/80 uppercase tracking-wider mb-2 sm:mb-3 px-3 sm:px-4 font-mono">
                                     {t.complianceZone}
@@ -494,6 +496,7 @@ export function HiddenMenu({ lang, dict }: HiddenMenuProps) {
                                     ))}
                                 </nav>
                             </div>
+                            */}
                         </div>
 
                         {/* Footer */}
