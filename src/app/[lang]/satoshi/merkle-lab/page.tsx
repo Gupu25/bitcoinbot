@@ -7,10 +7,11 @@ import {
   Sparkles, BookOpen, Shield, Zap, AlertTriangle, Info,
   ChevronDown, ChevronRight, FileText, Lock, GraduationCap,
   Trophy, HelpCircle, XCircle, CheckCircle, Lightbulb,
-  GitBranch, Layers, Target, RefreshCw
+  GitBranch, Layers, Target, RefreshCw, ToggleLeft, Database, Globe
 } from 'lucide-react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { BobChatWidget } from '@/components/chat/BobChatWidget';
+import { SPVVerifierPanel } from '@/components/labs/SPVVerifierPanel';
 
 // ============================================================================
 // DEMO DATA - Friendly transactions for users without Bitcoin knowledge
@@ -399,6 +400,7 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
   const [showEducational, setShowEducational] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
   const [labCompleted, setLabCompleted] = useState(false);
+  const [mode, setMode] = useState<'demo' | 'real'>('demo');
 
   // Quiz state
   const [quizStarted, setQuizStarted] = useState(false);
@@ -604,44 +606,91 @@ export default function MerkleLabPage({ params }: { params: { lang: 'en' | 'es' 
           {/* Center - Tree Visualization */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-1">
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 min-h-[500px] flex flex-col">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <TreeDeciduous className="w-5 h-5 text-green-400" />
-                Tree Structure
-                <InfoTooltip content={t.tip} />
-              </h3>
+              
+              {/* Header with toggle */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  {mode === 'demo' ? (
+                    <>
+                      <TreeDeciduous className="w-5 h-5 text-green-400" />
+                      Tree Structure
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-5 h-5 text-green-400" />
+                      Live Bitcoin
+                    </>
+                  )}
+                </h3>
+                
+                {/* TOGGLE DEMO/REAL */}
+                <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+                  <button
+                    onClick={() => setMode('demo')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-mono flex items-center gap-1.5 transition-all ${
+                      mode === 'demo' 
+                        ? 'bg-orange-500 text-white shadow-lg' 
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                    Demo
+                  </button>
+                  <button
+                    onClick={() => setMode('real')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-mono flex items-center gap-1.5 transition-all ${
+                      mode === 'real' 
+                        ? 'bg-green-500 text-white shadow-lg' 
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    Real
+                  </button>
+                </div>
+              </div>
 
-              <div className="flex-1 flex items-center justify-center overflow-auto">
-                {levels.length > 0 ? (
-                  <div className="space-y-8 py-4">
-                    {levels.map((level, levelIdx) => (
-                      <motion.div key={levelIdx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: levelIdx * 0.1 }} className="flex items-center justify-center gap-4 flex-wrap">
-                        {level.map((node, nodeIdx) => (
-                          <motion.button key={`${levelIdx}-${nodeIdx}`} onClick={() => node.isLeaf && handleSelectNode(node)} disabled={!node.isLeaf} className={`relative group ${node.isLeaf ? 'cursor-pointer' : 'cursor-default'}`} whileHover={node.isLeaf ? { scale: 1.1 } : {}} whileTap={node.isLeaf ? { scale: 0.95 } : {}}>
-                            <div className={`px-3 py-2 rounded-xl font-mono text-xs transition-all ${node.isLeaf ? selectedNode?.hash === node.hash ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
-                              {node.hash.slice(0, 8)}...
-                            </div>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px] shadow-xl border border-orange-500/20">
-                              {node.isLeaf ? (
-                                <>
-                                  <p className="text-orange-300 font-mono mb-1">{node.transaction}</p>
-                                  <p className="text-slate-400">{t.nodeTooltip}</p>
-                                </>
-                              ) : (
-                                <p className="text-slate-400">Parent hash (level {node.level})</p>
-                              )}
-                            </div>
-                          </motion.button>
-                        ))}
-                      </motion.div>
-                    ))}
-                  </div>
+              {/* CONTENIDO CONDICIONAL */}
+              <div className="flex-1 overflow-auto">
+                {mode === 'real' ? (
+                  <SPVVerifierPanel lang={lang} />
                 ) : (
-                  <div className="text-center text-slate-500">
-                    <TreeDeciduous className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p>Add transactions to build the tree</p>
+                  /* Demo mode - Merkle Tree */
+                  <div className="flex items-center justify-center h-full">
+                    {levels.length > 0 ? (
+                      <div className="space-y-8 py-4">
+                        {levels.map((level, levelIdx) => (
+                          <motion.div key={levelIdx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: levelIdx * 0.1 }} className="flex items-center justify-center gap-4 flex-wrap">
+                            {level.map((node, nodeIdx) => (
+                              <motion.button key={`${levelIdx}-${nodeIdx}`} onClick={() => node.isLeaf && handleSelectNode(node)} disabled={!node.isLeaf} className={`relative group ${node.isLeaf ? 'cursor-pointer' : 'cursor-default'}`} whileHover={node.isLeaf ? { scale: 1.1 } : {}} whileTap={node.isLeaf ? { scale: 0.95 } : {}}>
+                                <div className={`px-3 py-2 rounded-xl font-mono text-xs transition-all ${node.isLeaf ? selectedNode?.hash === node.hash ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
+                                  {node.hash.slice(0, 8)}...
+                                </div>
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px] shadow-xl border border-orange-500/20">
+                                  {node.isLeaf ? (
+                                    <>
+                                      <p className="text-orange-300 font-mono mb-1">{node.transaction}</p>
+                                      <p className="text-slate-400">{t.nodeTooltip}</p>
+                                    </>
+                                  ) : (
+                                    <p className="text-slate-400">Parent hash (level {node.level})</p>
+                                  )}
+                                </div>
+                              </motion.button>
+                            ))}
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-slate-500">
+                        <TreeDeciduous className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                        <p>Add transactions to build the tree</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+
             </div>
           </motion.div>
 
