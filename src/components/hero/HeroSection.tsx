@@ -30,7 +30,10 @@ export function HeroSection({ lang, dict }: HeroSectionProps) {
   const y = useTransform(scrollY, [0, 500], [0, 50]);
 
   const scrollToChat = () => {
-    document.getElementById('chat-section')?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      const el = document.getElementById('chat') ?? document.getElementById('chat-section');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const scrollToPartners = () => {
@@ -128,20 +131,17 @@ export function HeroSection({ lang, dict }: HeroSectionProps) {
             </motion.a>
           )}
 
-          {/* 2. Preguntar sobre Bitcoin - Chat */}
-          <motion.a
-            href="#chat-section"
+          {/* 2. Preguntar sobre Bitcoin - Chat (home uses id="chat", labs may use id="chat-section") */}
+          <motion.button
+            type="button"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToChat();
-            }}
-            className="group w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black font-bold text-base sm:text-lg lg:text-xl rounded-xl sm:rounded-2xl transition-all flex items-center justify-center gap-2 sm:gap-3 shadow-lg shadow-[#f7931a]/20 no-underline"
+            onClick={scrollToChat}
+            className="group w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5 bg-[#f7931a] hover:bg-[#f7931a]/90 text-black font-bold text-base sm:text-lg lg:text-xl rounded-xl sm:rounded-2xl transition-all flex items-center justify-center gap-2 sm:gap-3 shadow-lg shadow-[#f7931a]/20 cursor-pointer border-0"
           >
             <span>{dict.cta}</span>
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.a>
+          </motion.button>
 
           {/* 3. Comprar Bitcoin en México */}
           <motion.a
