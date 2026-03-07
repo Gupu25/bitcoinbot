@@ -9,9 +9,12 @@ import { Send, Zap } from 'lucide-react';
 interface ChatInterfaceProps {
   lang: Locale;
   dict: {
+    title?: string;
+    subtitle?: string;
     placeholder: string;
     thinking: string;
     welcome: string;
+    suggestedQuestions?: string[];
   };
 }
 
@@ -51,11 +54,8 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
     }
   }, [messages]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!input.trim() || isLoading) return;
+  const submitMessage = useCallback(async (content: string) => {
+    if (!content.trim() || isLoading) return;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -64,7 +64,7 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: content.trim(),
       createdAt: new Date(),
     };
 
@@ -153,7 +153,16 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
       abortControllerRef.current = null;
       inputRef.current?.focus({ preventScroll: true });
     }
+  }, [isLoading, lang, messages]);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    submitMessage(input);
   };
+
+  const suggestedQuestions = dict.suggestedQuestions ?? [];
+  const showChips = suggestedQuestions.length > 0 && messages.length <= 1 && !isLoading;
 
   const terminalLines = useMemo(() => {
     const lines: TerminalLine[] = messages.map((msg) => ({
@@ -187,32 +196,30 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
   return (
     <section
       id="chat-section"
-      className="relative py-12 sm:py-16 md:py-24 px-3 sm:px-4 md:px-6 bg-black scroll-mt-20"
+      className="relative py-8 sm:py-12 md:py-16 lg:py-24 px-3 sm:px-4 md:px-6 bg-black scroll-mt-20"
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto w-full min-w-0">
         {/* Header invitador - OPTIMIZADO PARA MÓVIL */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-8 sm:mb-12"
+          className="text-center mb-5 sm:mb-8 md:mb-12"
         >
-          <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-slate-900 border border-[#f7931a]/30 rounded-2xl sm:rounded-3xl mb-4 sm:mb-6">
-            <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-[#f7931a]" />
-            <span className="text-sm sm:text-lg font-mono text-[#f7931a] tracking-wider">Bitcoin Agent Online</span>
+          <div className="inline-flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-3 bg-slate-900 border border-[#f7931a]/30 rounded-xl sm:rounded-3xl mb-3 sm:mb-6">
+            <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-[#f7931a] shrink-0" />
+            <span className="text-xs sm:text-lg font-mono text-[#f7931a] tracking-wider">Bitcoin Agent Online</span>
           </div>
 
-          {/* 🐱 FIX #1: Tamaño de texto responsive - no más gigantismo en móvil */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-mono tracking-[-1px] mb-3 sm:mb-4">
-            Talk to Bitcoin Agent
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-mono tracking-[-1px] mb-2 sm:mb-4">
+            {dict.title ?? (lang === 'en' ? 'Talk to Bitcoin Agent' : 'Chatea con Bitcoin Agent')}
           </h2>
 
-          {/* 🐱 FIX #2: Subtítulo más compacto en móvil */}
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-1 sm:px-0">
-            {lang === 'en'
-              ? "Your direct line to Bitcoin wisdom. Ask freely — from sats math to privacy mastery, Lightning magic to monetary sovereignty. I'm here to teach, not preach. What's on your mind? ⚡"
-              : "Tu línea directa a la sabiduría Bitcoin. Pregunta sin miedo — desde matemáticas de sats hasta maestría en privacidad, magia Lightning y soberanía monetaria. Estoy aquí para enseñar, no para predicar. ¿Qué tienes en mente? ⚡"}
+          <p className="text-sm sm:text-lg md:text-xl lg:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-0">
+            {dict.subtitle ?? (lang === 'en'
+              ? "Ask anything: what Bitcoin is, how to buy it, why it matters. I explain everything in plain language. What can I help you with?"
+              : "Pregunta lo que sea: qué es Bitcoin, cómo comprar, por qué te conviene. Te explico todo en español, sin tecnisimos. ¿En qué te ayudo?")}
           </p>
         </motion.div>
 
@@ -222,12 +229,31 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.2 }}
+          className="w-full min-w-0 overflow-hidden"
         >
-          <TerminalWindow lines={terminalLines} isLoading={isLoading}>
-            {/* 🐱 FIX #3: Form más compacto en móvil - flex-col en vez de flex-row en xs */}
+          <TerminalWindow
+            lines={terminalLines}
+            isLoading={isLoading}
+            scrollableSlot={showChips ? (
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-slate-900/50 border-b border-slate-800 mt-2">
+                {suggestedQuestions.map((q) => (
+                  <motion.button
+                    key={q}
+                    type="button"
+                    onClick={() => submitMessage(q)}
+                    className="px-3 py-1.5 text-xs sm:text-sm font-mono rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:border-[#f7931a]/50 hover:text-[#f7931a] transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {q}
+                  </motion.button>
+                ))}
+              </div>
+            ) : undefined}
+          >
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 bg-slate-900 border-t border-slate-800 pt-3 sm:pt-5"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 bg-slate-900 pt-2 pb-4 sm:pt-4 md:pt-5 px-3 sm:px-4"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-[#f7931a] font-mono text-lg sm:text-xl font-bold flex-shrink-0">{'>'}</span>
@@ -240,7 +266,6 @@ export function ChatInterface({ lang, dict }: ChatInterfaceProps) {
                   placeholder={dict.placeholder || (lang === 'en' ? "Ask about Bitcoin..." : "Pregunta sobre Bitcoin...")}
                   disabled={isLoading}
                   className="flex-1 bg-transparent text-white font-mono text-base sm:text-lg outline-none placeholder:text-slate-500 caret-[#f7931a] selection:bg-[#f7931a]/30 min-w-0"
-                  autoFocus
                 />
               </div>
 

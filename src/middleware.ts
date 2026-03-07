@@ -90,10 +90,10 @@ function getApiKey(request: NextRequest): string | null {
   // Busca header case-insensitive
   const headers = Array.from(request.headers.entries());
   const apiKeyHeader = headers.find(([key]) => key.toLowerCase() === 'x-api-key');
-  
-  return apiKeyHeader?.[1] || 
-         request.nextUrl.searchParams.get('apiKey') || 
-         null;
+
+  return apiKeyHeader?.[1] ||
+    request.nextUrl.searchParams.get('apiKey') ||
+    null;
 }
 
 function isChallengeZone(path: string): boolean {
@@ -168,13 +168,13 @@ async function checkRateLimit(ip: string, tier: keyof typeof CONFIG.tiers): Prom
   const windowStart = Math.floor(now / config.window);
   const key = `btc:ratelimit:${ip}:${tier}:${windowStart}`;
   const windowSeconds = Math.floor(config.window / 1000);
-  
+
   // Intentar crear la key con valor 1 y TTL (atómico)
   const initialSet = await safeRedis(
     () => redis.set(key, '1', { nx: true, ex: windowSeconds }),
     null
   );
-  
+
   if (initialSet === 'OK') {
     // Key era nueva, este es el primer request en esta ventana
     return {
@@ -185,15 +185,15 @@ async function checkRateLimit(ip: string, tier: keyof typeof CONFIG.tiers): Prom
       resetTime: (windowStart + 1) * config.window
     };
   }
-  
+
   // Key ya existe, incrementar contador
   const newCount = await safeRedis(
     () => redis.incr(key),
     1
   );
-  
+
   const allowed = newCount <= config.requests;
-  
+
   return {
     allowed,
     currentCount: newCount,
@@ -210,7 +210,7 @@ async function checkRateLimit(ip: string, tier: keyof typeof CONFIG.tiers): Prom
 async function logAudit(entry: object): Promise<void> {
   const key = 'btc:immune:audit';
   const maxEntries = 10000;
-  
+
   await safeRedis(async () => {
     // Usar pipeline si está disponible, si no, operaciones secuenciales
     if ('pipeline' in redis && typeof redis.pipeline === 'function') {
@@ -302,16 +302,22 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     const hasCookie = request.cookies.has('btc-pow-verified');
 
+    // 🎓 HACKATHON MODE: Educational focus, security disabled
+    // Original code preserved for production deployment
+    // ⏸️ TEMPORARILY DISABLED for hackathon demo
+    // The educational Mining Lab is our focus now!
+    /*
     if (!isVerified && !hasCookie) {
       const challengeUrl = new URL('/challenge/pow', request.url);
       challengeUrl.searchParams.set('returnTo', request.url);
       challengeUrl.searchParams.set('difficulty', '3');
       return NextResponse.redirect(challengeUrl);
     }
+    */
   }
 
   // 8. DETERMINAR TIER Y VALIDAR AUTH
-  
+
   let tier: keyof typeof CONFIG.tiers = 'public';
 
   // CASO A: Admin APIs (/api/satoshi/*)
@@ -320,17 +326,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     if (apiKey !== process.env.ADMIN_API_KEY) {
       tier = 'public';
-      
+
       // Rate limit antes de rechazar (usando función atómica)
       const rateCheck = await checkRateLimit(ip, tier);
-      
+
       if (!rateCheck.allowed) {
         return new NextResponse(
-          JSON.stringify({ 
+          JSON.stringify({
             error: 'Too Many Attempts',
             retryAfter: Math.ceil((rateCheck.resetTime - Date.now()) / 1000)
-          }), 
-          { 
+          }),
+          {
             status: 429,
             headers: {
               'Content-Type': 'application/json',
@@ -345,7 +351,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    
+
     tier = 'satoshi';
   }
   // CASO B: Admin Pages (/satoshi/* - NO API)
@@ -366,7 +372,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (!rateCheck.allowed) {
     const retryAfter = Math.ceil((rateCheck.resetTime - Date.now()) / 1000);
-    
+
     return new NextResponse(
       JSON.stringify({
         error: 'Rate Limit Exceeded',
@@ -375,15 +381,15 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         window: `${rateCheck.window / 1000}s`,
         resetAt: new Date(rateCheck.resetTime).toISOString()
       }),
-      { 
-        status: 429, 
-        headers: { 
+      {
+        status: 429,
+        headers: {
           'Content-Type': 'application/json',
           'Retry-After': retryAfter.toString(),
           'X-RateLimit-Limit': rateCheck.limit.toString(),
           'X-RateLimit-Remaining': '0',
           'X-RateLimit-Reset': Math.ceil(rateCheck.resetTime / 1000).toString()
-        } 
+        }
       }
     );
   }
@@ -391,7 +397,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // 10. AUDIT: Log amenazas (Seguro - Sin API Keys)
   if (threatScore > 0 || tier === 'satoshi') {
     const safePath = request.nextUrl.pathname;
-    
+
     // Non-blocking audit log
     logAudit({
       ip: ip.slice(0, 20),
@@ -400,7 +406,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       threatScore,
       factors,
       timestamp: Date.now(),
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   // SUCCESS: Añadir headers informativos

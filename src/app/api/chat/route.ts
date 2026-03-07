@@ -1,213 +1,112 @@
-import { NextRequest } from 'next/server';
-import { streamChat, ENHANCED_SYSTEM_PROMPT } from '@/lib/groq';  // ← Import unificado
-import { searchWhitepaper } from '@/lib/vector/search';
+// src/app/api/chat/route.ts
+// 🤖 B.O.B. Chat API - Simple interface + Smart RAG backend
+// Request: { message, context?, lang?, useRAG?: boolean }
+// Response: { response: string }
+
+import { NextRequest, NextResponse } from 'next/server';
+import Groq from 'groq-sdk';
+import { searchWhitepaper } from '@/lib/vector/search'; // ← RAG import
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Context-aware RAG filters
+const RAG_FILTERS: Record<string, string> = {
+  general: 'bitcoin whitepaper basics',
+  mining: 'proof-of-work mining difficulty nonce',
+  signing: 'ECDSA Schnorr signature nonce cryptography',
+  taxes: 'bitcoin taxation compliance traceability',
+  seed: 'seed phrase entropy BIP39 security',
+  merkle: 'merkle tree SPV proof verification',
+};
+
+// Default system prompts (fallback if RAG fails)
+const CONTEXT_PROMPTS: Record<string, string> = {
+  general: 'You are B.O.B., a friendly Bitcoin tutor. Answer in simple terms.',
+  mining: 'You are B.O.B. Focus on Proof-of-Work, mining, and hash functions.',
+  signing: 'You are B.O.B. Explain digital signatures with analogies first.',
+  taxes: 'You are B.O.B. Focus on SAT compliance and Mexican tax law for Bitcoin.',
+  seed: 'You are B.O.B. Teach seed phrases and key security. "Not your keys, not your coins".',
+  merkle: 'You are B.O.B. Explain Merkle trees and transaction verification simply.',
+};
 
 export const runtime = 'edge';
 
-// 🎯 Type definitions para seguridad
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-interface RequestBody {
-  messages: ChatMessage[];
-  useRAG?: boolean;
-}
-
-interface WhitepaperDoc {
-  metadata?: {
-    text?: string;
-    [key: string]: any;
-  };
-  text?: string;
-  score?: number;
-}
-
-// ⏱️ Configurable timeout para RAG
-const RAG_TIMEOUT_MS = 2000;
-const MAX_RAG_DOCS = 3;
-
-/**
- * Extrae el último mensaje del usuario para búsqueda semántica
- */
-function getLastUserMessage(messages: ChatMessage[]): string | null {
-  const userMessages = messages.filter((m) => m.role === 'user');
-  return userMessages.pop()?.content ?? null;
-}
-
-/**
- * Formatea documentos del whitepaper para contexto
- */
-function formatRAGContext(docs: WhitepaperDoc[]): string {
-  if (!docs.length) return '';
-  
-  const context = docs
-    .map((doc, i) => {
-      const text = doc.metadata?.text || doc.text || '';
-      // Truncate long texts to prevent token bloat
-      const truncated = text.length > 500 ? text.slice(0, 500) + '...' : text;
-      return `[${i + 1}] ${truncated}`;
-    })
-    .join('\n\n');
-
-  return `\n\n📜 Contexto Whitepaper:\n${context}`;
-}
-
-/**
- * Wrapper con timeout para búsqueda vectorial
- */
-async function searchWithTimeout(
-  query: string, 
-  limit: number, 
-  timeoutMs: number
-): Promise<WhitepaperDoc[]> {
-  const timeoutPromise = new Promise<never>((_, reject) => 
+// 🔍 RAG search with timeout (from your original code~!)
+async function searchWithTimeout(query: string, timeoutMs = 2000) {
+  const timeout = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error('RAG_TIMEOUT')), timeoutMs)
   );
-  
+
   try {
-    return await Promise.race([
-      searchWhitepaper(query, limit),
-      timeoutPromise,
+    const results = await Promise.race([
+      searchWhitepaper(query, 3), // MAX 3 docs to control token usage
+      timeout,
     ]);
+    return results as any[];
   } catch (error) {
-    if (error instanceof Error && error.message === 'RAG_TIMEOUT') {
-      console.warn('⏱️ RAG search timeout - proceeding without context');
-    } else {
-      console.error('🔍 RAG search error:', error);
-    }
+    console.warn('⏱️ RAG timeout or error - proceeding without context');
     return [];
   }
 }
 
+// 📝 Format retrieved docs for prompt injection
+function formatRAGContext(docs: any[]): string {
+  if (!docs?.length) return '';
+  return '\n\n📚 Reference Context:\n' + docs
+    .map((d, i) => `[${i + 1}] ${d.metadata?.text || d.text || ''}`.slice(0, 400))
+    .join('\n');
+}
+
 export async function POST(request: NextRequest) {
-  const requestId = crypto.randomUUID().slice(0, 8);
-  
-  console.log(`🚀 [${requestId}] Chat request received`);
-
   try {
-    // 📝 Parse body con validación
-    let body: RequestBody;
-    try {
-      body = await request.json();
-    } catch {
-      return Response.json(
-        { error: 'Invalid JSON body', requestId }, 
-        { status: 400 }
-      );
+    const { message, context = 'general', lang = 'es', useRAG = true } = await request.json();
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ error: 'Message required' }, { status: 400 });
     }
 
-    const { messages, useRAG = true } = body;
+    // 🧠 Build system prompt
+    let systemPrompt = CONTEXT_PROMPTS[context] || CONTEXT_PROMPTS.general;
 
-    // ✅ Validación estricta
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return Response.json(
-        { error: 'Messages must be a non-empty array', requestId }, 
-        { status: 400 }
-      );
-    }
-
-    // Validar estructura de mensajes
-    const invalidMsg = messages.find(
-      (m) => !m.role || !['user', 'assistant', 'system'].includes(m.role) || typeof m.content !== 'string'
-    );
-    if (invalidMsg) {
-      return Response.json(
-        { error: 'Invalid message format', details: invalidMsg, requestId }, 
-        { status: 400 }
-      );
-    }
-
-    // 🧠 Construir prompt con RAG opcional
-    let systemPrompt = ENHANCED_SYSTEM_PROMPT;
-    let ragContext = '';
-    
+    // 🔍 Optional RAG enhancement
     if (useRAG) {
-      const lastUserMsg = getLastUserMessage(messages);
-      
-      if (lastUserMsg && lastUserMsg.trim().length > 0) {
-        console.log(`🔍 [${requestId}] Searching whitepaper for: "${lastUserMsg.slice(0, 50)}..."`);
-        
-        const docs = await searchWithTimeout(lastUserMsg, MAX_RAG_DOCS, RAG_TIMEOUT_MS);
-        
-        if (docs.length > 0) {
-          ragContext = formatRAGContext(docs);
-          systemPrompt += ragContext;
-          console.log(`✅ [${requestId}] RAG context added: ${docs.length} docs`);
-        } else {
-          console.log(`⚠️ [${requestId}] No relevant docs found`);
-        }
+      const filter = RAG_FILTERS[context] || RAG_FILTERS.general;
+      const query = `${filter} ${message}`.slice(0, 200); // Prevent overly long queries
+
+      const docs = await searchWithTimeout(query);
+      if (docs.length > 0) {
+        systemPrompt += formatRAGContext(docs);
+        console.log(`✅ RAG: ${docs.length} docs added for context="${context}"`);
       }
     }
 
-    // 🎭 Preparar mensajes para Groq
-    const groqMessages = [
-      { role: 'system' as const, content: systemPrompt },
-      ...messages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      })),
-    ];
+    // 🌐 Language instruction
+    const langHint = lang === 'es'
+      ? '\n\n🇲🇽 Responde en español de México, tono amigable y educativo.'
+      : '\n\n🇺🇸 Respond in English, friendly educational tone.';
 
-    // 🌊 Iniciar streaming
-    console.log(`⚡ [${requestId}] Starting stream...`);
-    const stream = streamChat({
-      messages: groqMessages,
-      temperature: 0.8,
-      max_tokens: 2048,
+    systemPrompt += langHint + '\n\nKeep answers concise (2-4 sentences) unless asked for detail.';
+
+    // 🤖 Call Groq
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message },
+      ],
+      temperature: 0.7,
+      max_tokens: 600, // Slightly more for RAG responses
     });
 
-    const encoder = new TextEncoder();
-    let chunkCount = 0;
-    
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            // Validar que el chunk sea string
-            if (typeof chunk !== 'string') {
-              console.warn(`⚠️ [${requestId}] Non-string chunk received:`, typeof chunk);
-              continue;
-            }
-            
-            controller.enqueue(encoder.encode(chunk));
-            chunkCount++;
-          }
-          
-          console.log(`✅ [${requestId}] Stream complete: ${chunkCount} chunks`);
-        } catch (err) {
-          console.error(`💥 [${requestId}] Stream error:`, err);
-          controller.error(err);
-        } finally {
-          controller.close();
-        }
-      },
-      
-      cancel() {
-        console.log(`🛑 [${requestId}] Stream cancelled by client`);
-      },
-    });
+    const response = completion.choices[0]?.message?.content?.trim()
+      || 'Sorry, I could not process that. Try rephrasing~!';
 
-    return new Response(readable, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Accel-Buffering': 'no',
-        'X-Request-ID': requestId,
-      },
-    });
+    return NextResponse.json({ response });
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`💀 [${requestId}] Fatal error:`, errorMessage);
-    
-    return Response.json(
-      { 
-        error: 'Internal server error', 
-        requestId,
-        timestamp: new Date().toISOString(),
-      }, 
+    console.error('❌ Chat API error:', error);
+    return NextResponse.json(
+      { response: 'Oops! Something went wrong. Please try again~! 🐱' },
       { status: 500 }
     );
   }

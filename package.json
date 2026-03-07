@@ -8,11 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "tsx scripts/seed-whitepaper.ts",
+    "db:seed": "tsx scripts/rag/upload_diploma_to_rag.ts",
     "check-env": "tsx scripts/check-env.ts"
   },
   "dependencies": {
+    "@noble/hashes": "^1.4.0",
     "@prisma/client": "^5.10.0",
+    "@scure/bip39": "^1.4.0",
     "@upstash/ratelimit": "^1.0.0",
     "@upstash/redis": "^1.36.2",
     "@upstash/vector": "^1.2.2",
@@ -29,6 +31,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^3.7.0",
+    "swr": "^2.2.0",
     "tailwind-merge": "^2.2.0",
     "tiny-secp256k1": "^2.2.4",
     "zod": "^3.22.0"

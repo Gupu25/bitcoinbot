@@ -44,8 +44,8 @@ interface TipJarProps {
 
 const defaultDictByLocale: Record<Locale, TipDict['tip']> = {
   en: {
-    title: 'Power the Mission',
-    description: 'Your sats fund the Bitcoin Agent infrastructure—servers, APIs, and continuous improvements.',
+    title: 'Leave a tip',
+    description: 'Your tip is voluntary. Sats you send help keep this project running: servers, APIs, and improvements. Thanks for your support!',
     button: 'Send Sats',
     success: 'Zap received! ⚡',
     error: 'Payment failed. Please try again.',
@@ -66,8 +66,8 @@ const defaultDictByLocale: Record<Locale, TipDict['tip']> = {
     }
   },
   es: {
-    title: 'Impulsa la Misión',
-    description: 'Tus sats mantienen vivo el Bitcoin Agent—servidores, APIs y mejoras continuas.',
+    title: 'Deja una propina',
+    description: 'Tu propina es voluntaria. Los sats que envíes ayudan a mantener este proyecto: servidores, APIs y mejoras. ¡Gracias por apoyar!',
     button: 'Enviar Sats',
     success: '¡Zap recibido! ⚡',
     error: 'El pago falló. Por favor intenta de nuevo.',
