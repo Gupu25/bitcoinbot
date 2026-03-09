@@ -21,6 +21,7 @@ export function BobChatWidget({ mode, context = 'general', lang = 'es' }: BobCha
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     // Load from sessionStorage on mount
     useEffect(() => {
@@ -35,9 +36,12 @@ export function BobChatWidget({ mode, context = 'general', lang = 'es' }: BobCha
         sessionStorage.setItem(`bob_chat_${context}`, JSON.stringify(messages));
     }, [messages, context]);
 
-    // Auto-scroll to bottom
+    // Auto-scroll to bottom (only within chat container, not the page)
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const el = messagesContainerRef.current;
+        if (el) {
+            el.scrollTop = el.scrollHeight;
+        }
     }, [messages]);
 
     // Context-aware system prompt
@@ -126,7 +130,7 @@ export function BobChatWidget({ mode, context = 'general', lang = 'es' }: BobCha
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950">
+                            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950">
                                 {messages.length === 0 && (
                                     <div className="text-center text-slate-500 text-sm mt-20">
                                         <p>👋 ¡Hola! Soy B.O.B.</p>
@@ -194,7 +198,7 @@ export function BobChatWidget({ mode, context = 'general', lang = 'es' }: BobCha
             </div>
 
             {/* Messages */}
-            <div className="h-[500px] overflow-y-auto p-4 space-y-3 bg-slate-950">
+            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-4 space-y-3 bg-slate-950">
                 {messages.length === 0 && (
                     <div className="text-center text-slate-500 text-sm mt-20">
                         <p className="text-2xl mb-2">🤖</p>
